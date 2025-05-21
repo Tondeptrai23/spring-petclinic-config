@@ -1,0 +1,40 @@
+{{- range $name, $config := .Values.services }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $config.containerName }}
+  labels:
+    app: {{ $config.containerName }}
+spec:
+  replicas: {{ $.Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ $config.containerName }}
+  template:
+    metadata:
+      labels:
+        app: {{ $config.containerName }}
+    spec:
+      {{- if $config.dependOnConfigServer }}
+      initContainers:
+        - name: wait-for-config-server
+          image: curlimages/curl:latest
+          command:
+            - sh
+            - -c
+            - >
+              until curl -I http://config-server:8888;
+              do echo "waiting for config server..."; sleep 5;
+              done
+      {{- end }}
+      containers:
+        - name: {{ $config.containerName }}
+          image: {{ $config.image }}:{{ $config.tag }} 
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ $config.port }}
+          env:
+            - name: EUREKA_INSTANCE_HOSTNAME
+              value: {{ $config.containerName }}
+{{- end }}
