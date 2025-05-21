@@ -37,4 +37,10 @@ spec:
           env:
             - name: EUREKA_INSTANCE_HOSTNAME
               value: {{ $config.containerName }}
+          resources:  # Add this section
+            limits:
+              memory: "512Mi" 
+            requests:
+              memory: "256Mi"
+{{- end }}
 {{- end }}
