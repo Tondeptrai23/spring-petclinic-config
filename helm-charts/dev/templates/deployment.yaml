@@ -39,7 +39,7 @@ spec:
               value: {{ $config.containerName }}
           resources:
             limits:
-              memory: "256Mi" 
+              memory: "300Mi" 
             requests:
               memory: "100Mi"
 {{- end }}
