@@ -1,3 +1,6 @@
+## Run kind
+
+```bash
 kind create cluster --config kind-config.yaml
 kubectl config set-cluster kind-petclinic --server https://127.0.0.1:9443
 
@@ -11,7 +14,13 @@ kubectl patch svc ingress-nginx-controller \
 {"op":"add","path":"/spec/ports/0/nodePort","value":30080},
 {"op":"add","path":"/spec/ports/1/nodePort","value":30443}
 ]'
+```
 
+Get Config data --> copy to file
+
+```bash
+cat ~/.kube/config
+```
 
 ## Run argocd
 

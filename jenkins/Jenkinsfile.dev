@@ -26,8 +26,8 @@ pipeline {
         DEV_REPO_URL       = 'https://github.com/Tondeptrai23/spring-petclinic-microservices.git'
 
         // Jenkins credential IDs (NOT the secrets themselves!)
-        DOCKERHUB_SECRET_ID = 'dockerhub-credentials2'  // string credential (value = secret name in the chart)
-        KUBECONFIG_ID       = 'kubernetes-config'          // file credential holding kube‑config
+        DOCKERHUB_SECRET_ID = 'dockerhub-credentials'  // string credential (value = secret name in the chart)
+        KUBECONFIG_ID       = 'kube-config'          // file credential holding kube‑config
     }
 
     stages {
@@ -151,7 +151,7 @@ pipeline {
     }
 
     post {
-        success { echo '✅ Deployment completed successfully.' }
-        failure { echo '❌ Deployment failed.' }
+        success { echo 'Deployment completed successfully.' }
+        failure { echo 'Deployment failed.' }
     }
 }
