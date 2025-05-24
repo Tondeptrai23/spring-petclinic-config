@@ -1,0 +1,34 @@
+pipeline {
+    agent any
+    
+    parameters {
+        string(name: 'NAMESPACE', defaultValue: '', description: 'Name of the Kubernetes namespace to delete')
+    }
+    
+    stages {
+        stage('Prepare') {
+            steps {
+                script {
+                    if (!params.NAMESPACE) {
+                        error "Parameter 'NAMESPACE' is required."
+                    }
+                }
+            }
+        }
+        
+        stage('Delete Namespace') {
+            steps {
+                sh "kubectl --kubeconfig=\"$KUBECONFIG\" delete namespace ${params.NAMESPACE} --ignore-not-found"
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo "Namespace '${params.NAMESPACE}' deletion triggered."
+        }
+        failure {
+            echo "Failed to delete namespace '${params.NAMESPACE}'."
+        }
+    }
+}

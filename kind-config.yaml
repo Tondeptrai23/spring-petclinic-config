@@ -36,3 +36,7 @@ nodes:
         nodeRegistration:
           kubeletExtraArgs:
             node-labels: "worker=true"
+    extraPortMappings:
+      - containerPort: 30080      # NodePort chosen by ingress-nginx for HTTP
+        hostPort: 30080           # Port you’ll hit on the host/LAN
+        listenAddress: "0.0.0.0"

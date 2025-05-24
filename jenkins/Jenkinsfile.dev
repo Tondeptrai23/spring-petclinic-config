@@ -1,0 +1,157 @@
+pipeline {
+    agent any
+
+    tools { git 'Default' }
+
+    options {
+        skipDefaultCheckout(true)
+    }
+
+    /************
+     * Parameters — one branch per micro‑service.
+     * Leave blank to fall back to "main".
+     */
+    parameters {
+        string(name: 'CONFIG_SERVER_BRANCH',       defaultValue: '', description: 'Branch for config‑server')
+        string(name: 'DISCOVERY_SERVER_BRANCH',    defaultValue: '', description: 'Branch for discovery‑server')
+        string(name: 'API_GATEWAY_BRANCH',         defaultValue: '', description: 'Branch for api‑gateway')
+        string(name: 'CUSTOMERS_SERVICE_BRANCH',   defaultValue: '', description: 'Branch for customers‑service')
+        string(name: 'VETS_SERVICE_BRANCH',        defaultValue: '', description: 'Branch for vets‑service')
+        string(name: 'VISITS_SERVICE_BRANCH',      defaultValue: '', description: 'Branch for visits‑service')
+    }
+
+    environment {
+        // Monorepo URLs
+        CONFIG_REPO_URL    = 'https://github.com/Tondeptrai23/spring-petclinic-config.git'
+        DEV_REPO_URL       = 'https://github.com/Tondeptrai23/spring-petclinic-microservices.git'
+
+        // Jenkins credential IDs (NOT the secrets themselves!)
+        DOCKERHUB_SECRET_ID = 'dockerhub-credentials2'  // string credential (value = secret name in the chart)
+        KUBECONFIG_ID       = 'kubernetes-config'          // file credential holding kube‑config
+    }
+
+    stages {
+        /*--------------------------------------------------------
+         * Checkout this config repo (Jenkinsfile + Helm charts)
+         *-------------------------------------------------------*/
+        stage('Checkout Config Repo') {
+            steps {
+                dir('config-repo') {
+                    git url: env.CONFIG_REPO_URL, branch: 'main', changelog: false, poll: false
+                }
+            }
+        }
+
+        stage('Get Namespace') {
+            steps {
+                script {
+                    env.NAMESPACE = "dev-${env.BUILD_ID}" // e.g. dev-123
+                }
+            }
+        }
+
+        /*--------------------------------------------------------
+         * Clone / fetch the dev repo once. We query branches for
+         * commit SHAs without additional checkouts.
+         *-------------------------------------------------------*/
+        stage('Clone Dev Repo') {
+            steps {
+                dir('dev-repo') {
+                    git url: env.DEV_REPO_URL, branch: 'main', changelog: false, poll: false
+                    sh 'git fetch --all --prune --quiet'
+                }
+            }
+        }
+
+        /*--------------------------------------------------------
+         * Resolve latest commit SHA for each service’s branch
+         *-------------------------------------------------------*/
+        stage('Resolve Commit Hashes') {
+            steps {
+                dir('dev-repo') {
+                    script {
+                        def branchParams = [
+                            'config-server'     : params.CONFIG_SERVER_BRANCH,
+                            'discovery-server'  : params.DISCOVERY_SERVER_BRANCH,
+                            'api-gateway'       : params.API_GATEWAY_BRANCH,
+                            'customers-service' : params.CUSTOMERS_SERVICE_BRANCH,
+                            'vets-service'      : params.VETS_SERVICE_BRANCH,
+                            'visits-service'    : params.VISITS_SERVICE_BRANCH
+                        ]
+
+                        branchParams.each { svc, branchParam ->
+                            def branch = branchParam?.trim() ?: 'main'
+                            def sha    = sh(script: "git rev-parse --verify origin/${branch}", returnStdout: true).trim()
+
+                            def envVar = (svc.replace('-', '_').toUpperCase()) + '_TAG'
+                            env."${envVar}" = sha   // sandbox‑safe write
+                            echo "${svc} → ${branch} @ ${sha}"
+                        }
+                    }
+                }
+            }
+        }
+
+        /*--------------------------------------------------------
+         * Deploy — pin each service image tag to its commit SHA
+         *-------------------------------------------------------*/
+        stage('Deploy to Namespace') {
+            steps {
+                script {
+                    def chartsRoot  = 'config-repo/helm-charts'
+                    def templateDir = "${chartsRoot}/dev"
+                    def namespace   = env.NAMESPACE?.trim() ?: 'dev'
+
+                    def SERVICES = [
+                        'config-server',
+                        'discovery-server',
+                        'api-gateway',
+                        'customers-service',
+                        'vets-service',
+                        'visits-service'
+                    ]
+
+                    // Build --set args from env variables populated earlier
+                    def setArgs = SERVICES.collect { svc ->
+                        def envVar = (svc.replace('-', '_').toUpperCase()) + '_TAG'
+                        def tag    = env."${envVar}"         // sandbox‑safe read
+                        "--set services.${svc}.tag=${tag}"
+                    }.join(' ')
+
+                    withCredentials([
+                        file  (credentialsId: env.KUBECONFIG_ID,       variable: 'KUBECONFIG'),
+                        string(credentialsId: env.DOCKERHUB_SECRET_ID, variable: 'DOCKERHUB_SECRET')
+                    ]) {
+                        sh """
+                            helm upgrade --install petclinic ${templateDir} \
+                                --namespace ${namespace} --create-namespace \
+                                -f ${templateDir}/values.yaml \
+                                --set image.pullSecrets[0].name=$DOCKERHUB_SECRET \
+                                ${setArgs}
+                        """
+                    }
+                }
+            }
+        }
+
+        /*--------------------------------------------------------
+         * Schedule automatic clean‑up of the namespace after a delay
+         *-------------------------------------------------------*/
+        stage('Trigger Delete Build Job with Delay') {
+            steps {
+                script {
+                    sleep time: 4, unit: 'MINUTES'
+
+                    build job: 'delete_build',
+                          parameters: [string(name: 'NAMESPACE', value: env.NAMESPACE)],
+                          wait: false
+                }
+            }
+        }
+    }
+
+    post {
+        success { echo '✅ Deployment completed successfully.' }
+        failure { echo '❌ Deployment failed.' }
+    }
+}
