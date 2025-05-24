@@ -12,7 +12,7 @@ nodes:
             node-labels: "ingress-ready=true"
     extraPortMappings:
       - containerPort: 30080      # NodePort chosen by ingress-nginx for HTTP
-        hostPort: 80
+        hostPort: 81
         protocol: TCP
       - containerPort: 30443
         hostPort: 8443
