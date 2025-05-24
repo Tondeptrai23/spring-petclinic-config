@@ -139,6 +139,14 @@ pipeline {
                                 ${setArgs}
                         """
                     }
+
+                    echo "Deployed ingress for namespace: ${namespace}"
+
+                    withCredentials([file(credentialsId: env.KUBECONFIG_ID, variable: 'KUBECONFIG')]) {
+                        sh "kubectl --kubeconfig=\"$KUBECONFIG\" apply -f config-repo/ingress/ingress.yaml --namespace ${namespace}"
+                    }
+
+                    echo "Ingress applied for namespace: ${namespace}"
                 }
             }
         }
@@ -149,10 +157,11 @@ pipeline {
         stage('Trigger Delete Build Job with Delay') {
             steps {
                 script {
+                    def DELAY_MINUTES = 5
                     build job: 'delete_build',
                         parameters: [string(name: 'NAMESPACE', value: env.NAMESPACE)],
                         wait: false,
-                        quietPeriod: 240
+                        quietPeriod: DELAY_MINUTES * 60 
                 }
             }
         }
