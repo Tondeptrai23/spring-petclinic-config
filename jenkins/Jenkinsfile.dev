@@ -26,7 +26,7 @@ pipeline {
         DEV_REPO_URL       = 'https://github.com/Tondeptrai23/spring-petclinic-microservices.git'
 
         // Jenkins credential IDs (NOT the secrets themselves!)
-        DOCKERHUB_SECRET_ID = 'dockerhub-credentials'  // string credential (value = secret name in the chart)
+        DOCKERHUB_SECRET_ID = 'dockerhub-secret'  // string credential (value = secret name in the chart)
         KUBECONFIG_ID       = 'kube-config'          // file credential holding kube‑config
     }
 
@@ -81,16 +81,25 @@ pipeline {
 
                         branchParams.each { svc, branchParam ->
                             def branch = branchParam?.trim() ?: 'main'
-                            def sha    = sh(script: "git rev-parse --verify origin/${branch}", returnStdout: true).trim()
+                            def tag
+
+                            if (branch == 'main') {
+                                tag = 'latest'
+                            } else {
+                                // any other branch → resolve its HEAD and shorten to 7 chars
+                                def sha = sh(script: "git rev-parse --verify origin/${branch}", returnStdout: true).trim()
+                                tag = sha.take(7)
+                            }
 
                             def envVar = (svc.replace('-', '_').toUpperCase()) + '_TAG'
-                            env."${envVar}" = sha   // sandbox‑safe write
-                            echo "${svc} → ${branch} @ ${sha}"
+                            env."${envVar}" = tag
+                            echo "${svc} → ${branch} @ ${tag}"
                         }
                     }
                 }
             }
         }
+
 
         /*--------------------------------------------------------
          * Deploy — pin each service image tag to its commit SHA
@@ -140,11 +149,10 @@ pipeline {
         stage('Trigger Delete Build Job with Delay') {
             steps {
                 script {
-                    sleep time: 4, unit: 'MINUTES'
-
                     build job: 'delete_build',
-                          parameters: [string(name: 'NAMESPACE', value: env.NAMESPACE)],
-                          wait: false
+                        parameters: [string(name: 'NAMESPACE', value: env.NAMESPACE)],
+                        wait: false,
+                        quietPeriod: 240
                 }
             }
         }

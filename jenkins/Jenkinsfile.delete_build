@@ -3,6 +3,10 @@ pipeline {
     
     parameters {
         string(name: 'NAMESPACE', defaultValue: '', description: 'Name of the Kubernetes namespace to delete')
+    }    
+    
+    environment {
+        KUBECONFIG_ID       = 'kube-config'          // file credential holding kube‑config
     }
     
     stages {
@@ -15,10 +19,14 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Delete Namespace') {
             steps {
-                sh "kubectl --kubeconfig=\"$KUBECONFIG\" delete namespace ${params.NAMESPACE} --ignore-not-found"
+                withCredentials([
+                    file  (credentialsId: env.KUBECONFIG_ID, variable: 'KUBECONFIG'),
+                ]) {
+                    sh "kubectl --kubeconfig=\"$KUBECONFIG\" delete namespace ${params.NAMESPACE} --ignore-not-found"
+                }
             }
         }
     }
