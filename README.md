@@ -11,3 +11,14 @@ kubectl patch svc ingress-nginx-controller \
 {"op":"add","path":"/spec/ports/0/nodePort","value":30080},
 {"op":"add","path":"/spec/ports/1/nodePort","value":30443}
 ]'
+
+
+## Run argocd
+
+```bash
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+argocd admin initial-password -n argocd
+
+kubectl port-forward svc/argocd-server -n argocd 38080:443 --address 0.0.0.0
+```
