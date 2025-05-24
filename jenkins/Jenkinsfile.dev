@@ -143,7 +143,12 @@ pipeline {
                     echo "Deployed ingress for namespace: ${namespace}"
 
                     withCredentials([file(credentialsId: env.KUBECONFIG_ID, variable: 'KUBECONFIG')]) {
-                        sh "kubectl --kubeconfig=\"$KUBECONFIG\" apply -f config-repo/ingress/ingress.yaml --namespace ${namespace}"
+                        sh """
+                            export NAMESPACE=${namespace}               # e.g. “dev”, “staging”, etc.
+                            envsubst < config-repo/ingress/ingress.yaml \
+                            | kubectl --kubeconfig="$KUBECONFIG" apply -f - \
+                                --namespace="$NAMESPACE"
+                        """
                     }
 
                     echo "Ingress applied for namespace: ${namespace}"
