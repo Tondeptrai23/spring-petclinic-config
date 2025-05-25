@@ -1,8 +1,26 @@
 helm:
   parameters:
   - name: image.name
-    value: mikenam/spring-petclinic-vets-service
+    value: mikenam/spring-petclinic-genai-service
     forcestring: true
   - name: image.tag
+    value: latest
+    forcestring: true
+  - name: images.customers-service.image
+    value: mikenam/spring-petclinic-customers-service
+    forcestring: true
+  - name: images.customers-service.tag
+    value: feat-add-docker-file-b21211a
+    forcestring: true
+  - name: images.vets-service.image
+    value: mikenam/spring-petclinic-vets-service
+    forcestring: true
+  - name: images.vets-service.tag
+    value: latest
+    forcestring: true
+  - name: images.visits-service.image
+    value: mikenam/spring-petclinic-visits-service
+    forcestring: true
+  - name: images.visits-service.tag
     value: latest
     forcestring: true
