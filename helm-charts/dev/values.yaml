@@ -1,4 +1,39 @@
 namespace: dev
+replicaCount: 1
+
+images:
+  config-server:
+    image: mikenam/spring-petclinic-config-server
+    tag: latest
+    
+  customers-service:
+    image: mikenam/spring-petclinic-customers-service
+    tag: latest
+
+  discovery-server:
+    image: mikenam/spring-petclinic-discovery-server
+    tag: latest
+
+  visits-service:
+    image: mikenam/spring-petclinic-visits-service
+    tag: latest
+
+  vets-service:
+    image: mikenam/spring-petclinic-vets-service
+    tag: latest
+
+  genai-service:
+    image: mikenam/spring-petclinic-genai-service
+    tag: latest
+
+  api-gateway:
+    image: mikenam/spring-petclinic-api-gateway
+    tag: latest
+
+  admin-server:
+    image: mikenam/spring-petclinic-admin-server
+    tag: latest
+
 services:
   config-server:
     containerName: config-server
@@ -15,44 +50,30 @@ services:
 
   discovery-server:
     containerName: discovery-server
-    image: mikenam/spring-petclinic-discovery-server
-    tag: latest
     port: 8761
     dependOnConfigServer: true
 
   visits-service:
     containerName: visits-service
-    image: mikenam/spring-petclinic-visits-service
-    tag: latest
     port: 8082
     dependOnConfigServer: true
 
   vets-service:
     containerName: vets-service
-    image: mikenam/spring-petclinic-vets-service
-    tag: latest
     port: 8083
     dependOnConfigServer: true
 
   genai-service:
     containerName: genai-service
-    image: mikenam/spring-petclinic-genai-service
-    tag: latest
     port: 8084
     dependOnConfigServer: true
 
   api-gateway:
     containerName: api-gateway
-    image: mikenam/spring-petclinic-api-gateway
-    tag: latest
     port: 8080
     dependOnConfigServer: true
 
   admin-server:
     containerName: admin-server
-    image: mikenam/spring-petclinic-admin-server
-    tag: latest
     port: 9090
     dependOnConfigServer: true
-
-replicaCount: 1
