@@ -11,12 +11,6 @@ nodes:
           kubeletExtraArgs:
             node-labels: "ingress-ready=true"
     extraPortMappings:
-      - containerPort: 30080      # NodePort chosen by ingress-nginx for HTTP
-        hostPort: 81
-        protocol: TCP
-      - containerPort: 30443
-        hostPort: 8443
-        protocol: TCP
       - containerPort: 6443
         hostPort: 9443
         protocol: TCP
@@ -30,5 +24,8 @@ nodes:
             node-labels: "worker=true"
     extraPortMappings:
       - containerPort: 30080      # NodePort chosen by ingress-nginx for HTTP
-        hostPort: 80           # Port you’ll hit on the host/LAN
+        hostPort: 81           # Port you’ll hit on the host/LAN
+        listenAddress: "0.0.0.0"
+      - containerPort: 30443
+        hostPort: 8443
         listenAddress: "0.0.0.0"
