@@ -16,7 +16,7 @@ helm:
     value: mikenam/spring-petclinic-vets-service
     forcestring: true
   - name: images.vets-service.tag
-    value: latest
+    value: feat-add-docker-file-b21211a
     forcestring: true
   - name: images.visits-service.image
     value: mikenam/spring-petclinic-visits-service
