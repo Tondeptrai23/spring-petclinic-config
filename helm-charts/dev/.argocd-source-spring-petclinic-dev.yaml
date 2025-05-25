@@ -1,7 +1,7 @@
 helm:
   parameters:
   - name: image.name
-    value: mikenam/spring-petclinic-visits-service
+    value: mikenam/spring-petclinic-vets-service
     forcestring: true
   - name: image.tag
     value: latest
