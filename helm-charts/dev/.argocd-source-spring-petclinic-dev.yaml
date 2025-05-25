@@ -4,5 +4,5 @@ helm:
     value: mikenam/spring-petclinic-visits-service
     forcestring: true
   - name: image.tag
-    value: 669b360
+    value: feat-add-docker-file-b21211a
     forcestring: true
