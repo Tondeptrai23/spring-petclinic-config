@@ -37,14 +37,10 @@ images:
 services:
   config-server:
     containerName: config-server
-    image: mikenam/spring-petclinic-config-server
-    tag: latest
     port: 8888
     
   customers-service:
     containerName: customers-service
-    image: mikenam/spring-petclinic-customers-service
-    tag: latest
     port: 8081
     dependOnConfigServer: true
 
