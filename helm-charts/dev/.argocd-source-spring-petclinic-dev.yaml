@@ -24,3 +24,33 @@ helm:
   - name: images.visits-service.tag
     value: latest
     forcestring: true
+  - name: images.admin-server.image
+    value: mikenam/spring-petclinic-admin-server
+    forcestring: true
+  - name: images.admin-server.tag
+    value: feat-add-docker-file-b21211a
+    forcestring: true
+  - name: images.api-gateway.image
+    value: mikenam/spring-petclinic-api-gateway
+    forcestring: true
+  - name: images.api-gateway.tag
+    value: feat-add-docker-file-b21211a
+    forcestring: true
+  - name: images.config-server.image
+    value: mikenam/spring-petclinic-config-server
+    forcestring: true
+  - name: images.config-server.tag
+    value: feat-add-docker-file-b21211a
+    forcestring: true
+  - name: images.discovery-server.image
+    value: mikenam/spring-petclinic-discovery-server
+    forcestring: true
+  - name: images.discovery-server.tag
+    value: feat-add-docker-file-b21211a
+    forcestring: true
+  - name: images.genai-service.image
+    value: mikenam/spring-petclinic-genai-service
+    forcestring: true
+  - name: images.genai-service.tag
+    value: latest
+    forcestring: true
