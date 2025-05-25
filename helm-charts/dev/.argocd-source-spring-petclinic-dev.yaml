@@ -52,5 +52,5 @@ helm:
     value: mikenam/spring-petclinic-genai-service
     forcestring: true
   - name: images.genai-service.tag
-    value: latest
+    value: feat-add-docker-file
     forcestring: true
