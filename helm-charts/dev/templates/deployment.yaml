@@ -30,7 +30,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ $config.containerName }}
-          image: {{ $config.image }}:{{ $config.tag }} 
+          image: {{ $.Values.images | get $config.containerName | default dict | get "repository" }}:{{ $.Values.images | get $config.containerName | default dict | get "tag" }}
           imagePullPolicy: Always
           ports:
             - containerPort: {{ $config.port }}
