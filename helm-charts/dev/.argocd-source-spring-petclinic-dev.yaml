@@ -22,7 +22,7 @@ helm:
     value: mikenam/spring-petclinic-visits-service
     forcestring: true
   - name: images.visits-service.tag
-    value: latest
+    value: 1bc2fb5
     forcestring: true
   - name: images.admin-server.image
     value: mikenam/spring-petclinic-admin-server
