@@ -1,8 +1,0 @@
-helm:
-  parameters:
-  - name: image.name
-    value: mikenam/spring-petclinic-visits-service
-    forcestring: true
-  - name: image.tag
-    value: 669b360
-    forcestring: true
