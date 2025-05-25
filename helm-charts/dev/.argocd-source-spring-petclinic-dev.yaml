@@ -10,47 +10,47 @@ helm:
     value: mikenam/spring-petclinic-customers-service
     forcestring: true
   - name: images.customers-service.tag
-    value: "null"
+    value: v1.1.8-e3bacf1
     forcestring: true
   - name: images.vets-service.image
     value: mikenam/spring-petclinic-vets-service
     forcestring: true
   - name: images.vets-service.tag
-    value: "null"
+    value: v1.1.8-e3bacf1
     forcestring: true
   - name: images.visits-service.image
     value: mikenam/spring-petclinic-visits-service
     forcestring: true
   - name: images.visits-service.tag
-    value: "null"
+    value: v1.1.8-e3bacf1
     forcestring: true
   - name: images.admin-server.image
     value: mikenam/spring-petclinic-admin-server
     forcestring: true
   - name: images.admin-server.tag
-    value: "null"
+    value: v1.1.8-e3bacf1
     forcestring: true
   - name: images.api-gateway.image
     value: mikenam/spring-petclinic-api-gateway
     forcestring: true
   - name: images.api-gateway.tag
-    value: "null"
+    value: v1.1.8-e3bacf1
     forcestring: true
   - name: images.config-server.image
     value: mikenam/spring-petclinic-config-server
     forcestring: true
   - name: images.config-server.tag
-    value: "null"
+    value: v1.1.8-e3bacf1
     forcestring: true
   - name: images.discovery-server.image
     value: mikenam/spring-petclinic-discovery-server
     forcestring: true
   - name: images.discovery-server.tag
-    value: "null"
+    value: v1.1.8-e3bacf1
     forcestring: true
   - name: images.genai-service.image
     value: mikenam/spring-petclinic-genai-service
     forcestring: true
   - name: images.genai-service.tag
-    value: "null"
+    value: v1.1.8-e3bacf1
     forcestring: true
