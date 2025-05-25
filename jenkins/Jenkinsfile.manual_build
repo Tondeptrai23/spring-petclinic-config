@@ -8,16 +8,23 @@ pipeline {
     }
 
     /************
-     * Parameters — one branch per micro‑service.
+     * Parameters — one branch per micro-service.
      * Leave blank to fall back to "main".
      */
     parameters {
-        string(name: 'CONFIG_SERVER_BRANCH',       defaultValue: '', description: 'Branch for config‑server')
-        string(name: 'DISCOVERY_SERVER_BRANCH',    defaultValue: '', description: 'Branch for discovery‑server')
-        string(name: 'API_GATEWAY_BRANCH',         defaultValue: '', description: 'Branch for api‑gateway')
-        string(name: 'CUSTOMERS_SERVICE_BRANCH',   defaultValue: '', description: 'Branch for customers‑service')
-        string(name: 'VETS_SERVICE_BRANCH',        defaultValue: '', description: 'Branch for vets‑service')
-        string(name: 'VISITS_SERVICE_BRANCH',      defaultValue: '', description: 'Branch for visits‑service')
+        string(name: 'CONFIG_SERVER_BRANCH',       defaultValue: '',  description: 'Branch for config-server')
+        string(name: 'DISCOVERY_SERVER_BRANCH',    defaultValue: '',  description: 'Branch for discovery-server')
+        string(name: 'API_GATEWAY_BRANCH',         defaultValue: '',  description: 'Branch for api-gateway')
+        string(name: 'CUSTOMERS_SERVICE_BRANCH',   defaultValue: '',  description: 'Branch for customers-service')
+        string(name: 'VETS_SERVICE_BRANCH',        defaultValue: '',  description: 'Branch for vets-service')
+        string(name: 'VISITS_SERVICE_BRANCH',      defaultValue: '',  description: 'Branch for visits-service')
+
+        // New parameter for cleanup delay
+        string(
+            name: 'CLEANUP_DELAY_MINUTES',
+            defaultValue: '60',
+            description: 'Delay in minutes before the cleanup ("delete_build") job is triggered'
+        )
     }
 
     environment {
@@ -26,14 +33,11 @@ pipeline {
         DEV_REPO_URL       = 'https://github.com/Tondeptrai23/spring-petclinic-microservices.git'
 
         // Jenkins credential IDs (NOT the secrets themselves!)
-        DOCKERHUB_SECRET_ID = 'dockerhub-secret'  // string credential (value = secret name in the chart)
-        KUBECONFIG_ID       = 'kube-config'          // file credential holding kube‑config
+        DOCKERHUB_SECRET_ID = 'dockerhub-secret'
+        KUBECONFIG_ID       = 'kube-config'
     }
 
     stages {
-        /*--------------------------------------------------------
-         * Checkout this config repo (Jenkinsfile + Helm charts)
-         *-------------------------------------------------------*/
         stage('Checkout Config Repo') {
             steps {
                 dir('config-repo') {
@@ -45,15 +49,11 @@ pipeline {
         stage('Get Namespace') {
             steps {
                 script {
-                    env.NAMESPACE = "dev-${env.BUILD_ID}" // e.g. dev-123
+                    env.NAMESPACE = "dev-${env.BUILD_ID}"
                 }
             }
         }
 
-        /*--------------------------------------------------------
-         * Clone / fetch the dev repo once. We query branches for
-         * commit SHAs without additional checkouts.
-         *-------------------------------------------------------*/
         stage('Clone Dev Repo') {
             steps {
                 dir('dev-repo') {
@@ -63,9 +63,6 @@ pipeline {
             }
         }
 
-        /*--------------------------------------------------------
-         * Resolve latest commit SHA for each service’s branch
-         *-------------------------------------------------------*/
         stage('Resolve Commit Hashes') {
             steps {
                 dir('dev-repo') {
@@ -86,8 +83,10 @@ pipeline {
                             if (branch == 'main') {
                                 tag = 'latest'
                             } else {
-                                // any other branch → resolve its HEAD and shorten to 7 chars
-                                def sha = sh(script: "git rev-parse --verify origin/${branch}", returnStdout: true).trim()
+                                def sha = sh(
+                                    script: "git rev-parse --verify origin/${branch}",
+                                    returnStdout: true
+                                ).trim()
                                 tag = sha.take(7)
                             }
 
@@ -100,10 +99,6 @@ pipeline {
             }
         }
 
-
-        /*--------------------------------------------------------
-         * Deploy — pin each service image tag to its commit SHA
-         *-------------------------------------------------------*/
         stage('Deploy to Namespace') {
             steps {
                 script {
@@ -120,11 +115,9 @@ pipeline {
                         'visits-service'
                     ]
 
-                    // Build --set args from env variables populated earlier
                     def setArgs = SERVICES.collect { svc ->
                         def envVar = (svc.replace('-', '_').toUpperCase()) + '_TAG'
-                        def tag    = env."${envVar}"         // sandbox‑safe read
-                        "--set services.${svc}.tag=${tag}"
+                        "--set services.${svc}.tag=${env."${envVar}"}"
                     }.join(' ')
 
                     withCredentials([
@@ -144,10 +137,10 @@ pipeline {
 
                     withCredentials([file(credentialsId: env.KUBECONFIG_ID, variable: 'KUBECONFIG')]) {
                         sh """
-                            export NAMESPACE=${namespace}               # e.g. “dev”, “staging”, etc.
+                            export NAMESPACE=${namespace}
                             envsubst < config-repo/ingress/ingress.yaml \
-                            | kubectl --kubeconfig="$KUBECONFIG" apply -f - \
-                                --namespace="$NAMESPACE"
+                              | kubectl --kubeconfig="$KUBECONFIG" apply -f - \
+                                  --namespace="$NAMESPACE"
                         """
                     }
 
@@ -156,17 +149,18 @@ pipeline {
             }
         }
 
-        /*--------------------------------------------------------
-         * Schedule automatic clean‑up of the namespace after a delay
-         *-------------------------------------------------------*/
         stage('Trigger Delete Build Job with Delay') {
             steps {
                 script {
-                    def DELAY_MINUTES = 5
+                    def delayStr = params.CLEANUP_DELAY_MINUTES?.trim() ?: '60'
+                    def DELAY_MINUTES = delayStr.isInteger() ? delayStr.toInteger() : 60
+
                     build job: 'delete_build',
-                        parameters: [string(name: 'NAMESPACE', value: env.NAMESPACE)],
-                        wait: false,
-                        quietPeriod: DELAY_MINUTES * 60 
+                          parameters: [
+                              string(name: 'NAMESPACE', value: env.NAMESPACE)
+                          ],
+                          wait: false,
+                          quietPeriod: DELAY_MINUTES * 60
                 }
             }
         }
