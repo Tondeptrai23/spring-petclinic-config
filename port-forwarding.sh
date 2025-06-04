@@ -17,7 +17,7 @@ for SERVICE in "${!SERVICES[@]}"; do
   
   echo "Starting port-forward for $SERVICE ($SERVICE_NAME in namespace $NAMESPACE)..."
   
-  kubectl port-forward svc/$SERVICE_NAME $PORTS -n $NAMESPACE > "$SERVICE-portforward.log" 2>&1 &
+  kubectl port-forward svc/$SERVICE_NAME $PORTS --address 0.0.0.0 -n $NAMESPACE > "$SERVICE-portforward.log" 2>&1 &
   
   echo "$SERVICE is now available at localhost:${PORTS%%:*}"
 done

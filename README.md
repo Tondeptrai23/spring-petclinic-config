@@ -42,8 +42,9 @@ helm repo update
 
 ## Monitoring
 kubectl create namespace monitoring
-helm install prometheus prometheus-community/kube-prometheus-stack --namespace monitoring
-
+helm install prometheus prometheus-community/kube-prometheus-stack \
+    --namespace monitoring \
+    --set prometheus.prometheusSpec.maximumStartupDurationSeconds=60
 
 ## GET ADMIN PASSWORD TO ACCESS GRAFANA
 kubectl get secret --namespace monitoring prometheus-grafana -o jsonpath="{.data.admin-password}" | base64 --decode; echo
@@ -57,10 +58,10 @@ kubectl create namespace tracing
 helm install zipkin zipkin/zipkin --namespace tracing
 
 ## PORT FORWARDING FOR LOCAL TESTING
-kubectl port-forward svc/prometheus-operated 9090:9090 -n monitoring
-kubectl port-forward svc/prometheus-grafana 3000:80 -n monitoring
-kubectl port-forward svc/loki 3100:3100 -n logging
-kubectl port-forward svc/zipkin 9411:9411 -n tracing
+kubectl port-forward svc/prometheus-operated 9090:9090 -n monitoring --address 0.0.0.0
+kubectl port-forward svc/prometheus-grafana 3000:80 -n monitoring --address 0.0.0.0
+kubectl port-forward svc/loki 3100:3100 -n logging --address 0.0.0.0
+kubectl port-forward svc/zipkin 9411:9411 -n tracing --address 0.0.0.0
 ## Or you can run
 ./port-forwarding.sh
 ```
