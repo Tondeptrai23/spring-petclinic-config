@@ -44,11 +44,7 @@ helm repo update
 kubectl create namespace monitoring
 helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
     --namespace monitoring \
-    --set prometheus.prometheusSpec.maximumStartupDurationSeconds=60 \
-    # --reuse-values \
-    # --set kubeEtcd.enabled=false \
-    # --set kubeScheduler.serviceMonitor.enabled=false \
-    # --set kubeProxy.serviceMonitor.enabled=false
+    -f prometheus.yaml
 
 ## GET ADMIN PASSWORD TO ACCESS GRAFANA
 kubectl get secret --namespace monitoring prometheus-grafana -o jsonpath="{.data.admin-password}" | base64 --decode; echo
