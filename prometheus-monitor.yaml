@@ -10,17 +10,8 @@ spec:
     any: true
 
   selector:
-    matchExpressions:
-      - key: app
-        operator: In
-        values:
-          - discovery-server
-          - customers-service
-          - visits-service
-          - vets-service
-          - genai-service
-          - api-gateway
-          - admin-server
+    matchLabels:
+      metrics: "true"
 
   endpoints:
     - port: http

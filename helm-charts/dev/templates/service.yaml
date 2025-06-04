@@ -6,12 +6,14 @@ metadata:
   name: {{ $config.containerName }}
   labels:
     app.kubernetes.io/name: {{ $config.containerName }}
+    metrics: "true"
 spec:
   selector:
     app: {{ $config.containerName }}
   type: ClusterIP
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: {{ $config.port }}
       targetPort: {{ $config.port }}
 {{- end }}
