@@ -129,6 +129,7 @@ pipeline {
                                 --namespace ${namespace} --create-namespace \
                                 -f ${templateDir}/values.yaml \
                                 --set image.pullSecrets[0].name=$DOCKERHUB_SECRET \
+                                --set namespace=${namespace} \
                                 ${setArgs}
                         """
                     }

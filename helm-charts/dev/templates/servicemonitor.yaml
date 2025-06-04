@@ -16,5 +16,5 @@ spec:
       interval: 15s
   namespaceSelector:
     matchNames:
-      - {{ .Release.Namespace }}
+      - {{ .Values.namespace }}
 {{- end }}
