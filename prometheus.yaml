@@ -3,12 +3,3 @@ prometheus:
     serviceMonitorNamespaceSelector: {}
     podMonitorNamespaceSelector: {}
     maximumStartupDurationSeconds: 60
-
-kubeEtcd:
-  enabled: false
-kubeScheduler:
-  serviceMonitor:
-    enabled: false
-kubeProxy:
-  serviceMonitor:
-    enabled: false
