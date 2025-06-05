@@ -38,45 +38,46 @@ services:
   config-server:
     containerName: config-server
     port: 8888
+    metrics: "false"
     
   customers-service:
     containerName: customers-service
     port: 8081
     dependOnConfigServer: true
-    metris: "true"
+    metrics: "true"
 
   discovery-server:
     containerName: discovery-server
     port: 8761
     dependOnConfigServer: true
-    metris: "true"
+    metrics: "true"
 
   visits-service:
     containerName: visits-service
     port: 8082
     dependOnConfigServer: true
-    metris: "true"
+    metrics: "true"
 
   vets-service:
     containerName: vets-service
     port: 8083
     dependOnConfigServer: true
-    metris: "true"
+    metrics: "true"
 
   genai-service:
     containerName: genai-service
     port: 8084
     dependOnConfigServer: true
-    metris: "true"
+    metrics: "true"
 
   api-gateway:
     containerName: api-gateway
     port: 8080
     dependOnConfigServer: true
-    metris: "true"
+    metrics: "true"
 
   admin-server:
     containerName: admin-server
     port: 9090
     dependOnConfigServer: true
-    metris: "true"
+    metrics: "true"
