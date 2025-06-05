@@ -6,7 +6,7 @@ metadata:
   name: {{ $config.containerName }}
   labels:
     app.kubernetes.io/name: {{ $config.containerName }}
-    metrics: "true"
+    metrics: {{ $config.metrics | default "false" }}
 spec:
   selector:
     app: {{ $config.containerName }}

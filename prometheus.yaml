@@ -12,3 +12,17 @@ kubeScheduler:
 kubeProxy:
   serviceMonitor:
     enabled: false
+
+additionalPrometheusRulesMap:
+  http-5xx:
+    groups:
+    - name: http_5xx_alerts
+      rules:
+      - alert: HighRateOfHTTP500
+        expr: increase(http_requests_total{code="500"}[30s]) > 10
+        for: 0s
+        labels:
+          severity: critical
+        annotations:
+          summary:  "Spike in HTTP 500 responses"
+          description: "{{ $value }} HTTP 500s in the last 30 s"
