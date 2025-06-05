@@ -64,12 +64,6 @@ services:
     dependOnConfigServer: true
     metrics: "true"
 
-  genai-service:
-    containerName: genai-service
-    port: 8084
-    dependOnConfigServer: true
-    metrics: "true"
-
   api-gateway:
     containerName: api-gateway
     port: 8080

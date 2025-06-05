@@ -1,13 +1,14 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: petclinic-servicemonitor
-  namespace: monitoring
+  name: petclinic-${NAMESPACE}-servicemonitor
+  namespace: ${NAMESPACE}
   labels:
     release: prometheus
 spec:
   namespaceSelector:
-    any: true
+    matchNames:
+      - ${NAMESPACE}
 
   selector:
     matchLabels:

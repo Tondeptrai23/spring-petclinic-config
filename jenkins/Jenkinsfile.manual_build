@@ -145,7 +145,18 @@ pipeline {
                         """
                     }
 
-                    echo "Ingress applied for namespace: ${namespace}"
+                    echo "Deployed service monitoring for namespace: ${namespace}"
+
+                    withCredentials([file(credentialsId: env.KUBECONFIG_ID, variable: 'KUBECONFIG')]) {
+                        sh """
+                            export NAMESPACE=${namespace}
+                            envsubst < config-repo/prometheus/service-monitor.yaml \
+                              | kubectl --kubeconfig="$KUBECONFIG" apply -f - \
+                                  --namespace="$NAMESPACE"
+                        """
+                    }
+
+                    echo "All services deployed successfully in namespace: ${namespace}"
                 }
             }
         }
