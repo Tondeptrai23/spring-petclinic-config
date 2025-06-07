@@ -6,6 +6,7 @@ declare -A SERVICES=(
   ["Grafana"]="monitoring prometheus-grafana 3000:80"
   ["Loki"]="logging loki-loki-distributed-gateway 3100:80"
   ["Zipkin"]="tracing zipkin 9411:9411"
+  ["Alloy"]="logging alloy 12345:12345"
 )
 
 # Start port-forwarding in background for each service

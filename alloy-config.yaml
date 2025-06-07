@@ -19,22 +19,34 @@ data:
       }
     }
 
-    // Kubernetes service discovery
+    // Kubernetes service discovery for pods
     discovery.kubernetes "pods" {
       role = "pod"
-      namespaces {
-        names = ["dev"]
-      }
+      // Remove namespace restriction to catch all namespaces including dev-* 
     }
 
     // Filter and relabel for Spring Boot services
     discovery.relabel "spring_services" {
       targets = discovery.kubernetes.pods.targets
 
-      // Keep only specific services
+      // Keep only pods from dev-* namespaces and staging
+      rule {
+        source_labels = ["__meta_kubernetes_namespace"]
+        regex         = "(dev.*|staging)"
+        action        = "keep"
+      }
+
+      // Keep only specific Spring Boot services
       rule {
         source_labels = ["__meta_kubernetes_pod_label_app"]
-        regex         = "(visits-service|customers-service|vets-service|api-gateway|config-server|discovery-server)"
+        regex         = "(visits-service|customers-service|vets-service|api-gateway|config-server|discovery-server|admin-server|genai-service)"
+        action        = "keep"
+      }
+
+      // Keep only running pods
+      rule {
+        source_labels = ["__meta_kubernetes_pod_phase"]
+        regex         = "Running"
         action        = "keep"
       }
 
@@ -62,17 +74,17 @@ data:
         target_label  = "container"
       }
 
-      // Set log path
+      // Set correct log path for Kubernetes container logs
       rule {
-        source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
-        separator     = "/"
+        source_labels = ["__meta_kubernetes_pod_name", "__meta_kubernetes_pod_container_name"]
+        separator     = "_"
         target_label  = "__path__"
-        replacement   = "/var/log/pods/*${1}/*.log"
+        replacement   = "/var/log/containers/*${1}_*.log"
       }
     }
 
-    // Kubernetes log source
-    loki.source.kubernetes "pods" {
+    // File source for container logs
+    loki.source.file "container_logs" {
       targets    = discovery.relabel.spring_services.output
       forward_to = [loki.process.spring_logs.receiver]
     }
@@ -81,17 +93,112 @@ data:
     loki.process "spring_logs" {
       forward_to = [loki.write.default.receiver]
 
+      // Parse container log format (includes Docker/containerd metadata)
       stage.cri {}
 
-      // Extract log level from Spring Boot logs
+      // Extract Spring Boot log pattern
       stage.regex {
-        expression = "^(?P<timestamp>\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}[.,]\\d{3})\\s+(?P<level>\\w+)\\s+.*"
+        expression = "^(?P<timestamp>\\d{4}-\\d{2}-\\d{2}[T\\s]\\d{2}:\\d{2}:\\d{2}[.,]\\d{3})\\s*(?P<level>TRACE|DEBUG|INFO|WARN|ERROR|FATAL)\\s+(?P<thread>\\[.*?\\])?\\s*(?P<logger>\\S+)?\\s*[:-]?\\s*(?P<message>.*)"
       }
 
-      // Add level label
+      // Add extracted labels
       stage.labels {
         values = {
           level = "",
+          thread = "",
+          logger = "",
         }
       }
+
+      // Drop noisy logs (optional)
+      stage.drop {
+        expression = ".*actuator/health.*"
+        drop_counter_reason = "health_check"
+      }
+
+      // Add timestamp parsing if needed
+      stage.timestamp {
+        source = "timestamp"
+        format = "2006-01-02 15:04:05.000"
+      }
     }
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: alloy
+  namespace: logging
+spec:
+  selector:
+    matchLabels:
+      name: alloy
+  template:
+    metadata:
+      labels:
+        name: alloy
+    spec:
+      serviceAccountName: alloy
+      containers:
+        - name: alloy
+          image: grafana/alloy:latest
+          args:
+            - run
+            - /etc/alloy/config.alloy
+            - --server.http.listen-addr=0.0.0.0:12345
+          volumeMounts:
+            - name: config
+              mountPath: /etc/alloy
+            - name: varlog
+              mountPath: /var/log
+              readOnly: true
+            - name: varlibdockercontainers
+              mountPath: /var/lib/docker/containers
+              readOnly: true
+          ports:
+            - containerPort: 12345
+              name: http-metrics
+          securityContext:
+            runAsUser: 0
+      volumes:
+        - name: config
+          configMap:
+            name: alloy-config
+        - name: varlog
+          hostPath:
+            path: /var/log
+        - name: varlibdockercontainers
+          hostPath:
+            path: /var/lib/docker/containers
+      tolerations:
+        - operator: Exists
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: alloy
+  namespace: logging
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: alloy
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "nodes", "services", "endpoints"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["nodes/proxy"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: alloy
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: alloy
+subjects:
+  - kind: ServiceAccount
+    name: alloy
+    namespace: logging
