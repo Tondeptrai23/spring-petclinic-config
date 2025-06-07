@@ -1,0 +1,97 @@
+# alloy-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alloy-config
+  namespace: logging
+data:
+  config.alloy: |
+    // Logging configuration
+    logging {
+      level  = "info"
+      format = "logfmt"
+    }
+
+    // Loki client configuration
+    loki.write "default" {
+      endpoint {
+        url = "http://loki-loki-distributed-gateway:80/loki/api/v1/push"
+      }
+    }
+
+    // Kubernetes service discovery
+    discovery.kubernetes "pods" {
+      role = "pod"
+      namespaces {
+        names = ["dev"]
+      }
+    }
+
+    // Filter and relabel for Spring Boot services
+    discovery.relabel "spring_services" {
+      targets = discovery.kubernetes.pods.targets
+
+      // Keep only specific services
+      rule {
+        source_labels = ["__meta_kubernetes_pod_label_app"]
+        regex         = "(visits-service|customers-service|vets-service|api-gateway|config-server|discovery-server)"
+        action        = "keep"
+      }
+
+      // Add service label
+      rule {
+        source_labels = ["__meta_kubernetes_pod_label_app"]
+        target_label  = "service"
+      }
+
+      // Add namespace label
+      rule {
+        source_labels = ["__meta_kubernetes_namespace"]
+        target_label  = "namespace"
+      }
+
+      // Add pod name label
+      rule {
+        source_labels = ["__meta_kubernetes_pod_name"]
+        target_label  = "pod"
+      }
+
+      // Add container name label
+      rule {
+        source_labels = ["__meta_kubernetes_pod_container_name"]
+        target_label  = "container"
+      }
+
+      // Set log path
+      rule {
+        source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
+        separator     = "/"
+        target_label  = "__path__"
+        replacement   = "/var/log/pods/*${1}/*.log"
+      }
+    }
+
+    // Kubernetes log source
+    loki.source.kubernetes "pods" {
+      targets    = discovery.relabel.spring_services.output
+      forward_to = [loki.process.spring_logs.receiver]
+    }
+
+    // Process Spring Boot logs
+    loki.process "spring_logs" {
+      forward_to = [loki.write.default.receiver]
+
+      stage.cri {}
+
+      // Extract log level from Spring Boot logs
+      stage.regex {
+        expression = "^(?P<timestamp>\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}[.,]\\d{3})\\s+(?P<level>\\w+)\\s+.*"
+      }
+
+      // Add level label
+      stage.labels {
+        values = {
+          level = "",
+        }
+      }
+    }
