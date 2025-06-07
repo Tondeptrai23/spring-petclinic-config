@@ -1,0 +1,57 @@
+# promtail-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: promtail-config
+  namespace: logging
+data:
+  config.yml: |
+    server:
+      http_listen_port: 3101
+      grpc_listen_port: 0
+
+    positions:
+      filename: /tmp/positions.yaml
+
+    clients:
+      - url: http://loki-loki-distributed-gateway:80/loki/api/v1/push
+
+    scrape_configs:
+      - job_name: kubernetes-pods
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          # Chỉ thu thập logs từ pods có label app
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            regex: (.+)
+            target_label: app
+          - source_labels: [__meta_kubernetes_pod_label_service]
+            target_label: service
+          - source_labels: [__meta_kubernetes_pod_label_component]
+            target_label: component
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_container_name]
+            target_label: container
+          # Đường dẫn tới log files
+          - replacement: /var/log/pods/*$1/*.log
+            separator: /
+            source_labels:
+              - __meta_kubernetes_pod_uid
+              - __meta_kubernetes_pod_container_name
+            target_label: __path__
+        pipeline_stages:
+          - cri: {}
+          - regex:
+              expression: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\s+\[(?P<thread>[^\]]+)\]\s+(?P<level>\w+)\s+\[(?P<logger>[^\]]+)\]\s+\[(?P<trace_id>[^,]*),(?P<span_id>[^\]]*)\]\s+-\s+(?P<message>.*)'
+          - labels:
+              level:
+              thread:
+              logger:
+              trace_id:
+              span_id:
+          - timestamp:
+              source: timestamp
+              format: '2006-01-02 15:04:05.000'

@@ -37,6 +37,16 @@ spec:
           env:
             - name: EUREKA_INSTANCE_HOSTNAME
               value: {{ $config.containerName }}
+            - name: SERVICE_NAME
+              value: {{ $config.containerName }}
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
           resources:
             limits:
               memory: "300Mi" 

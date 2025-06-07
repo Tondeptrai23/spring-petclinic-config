@@ -4,7 +4,7 @@
 declare -A SERVICES=(
   ["Prometheus"]="monitoring prometheus-operated 9090:9090"
   ["Grafana"]="monitoring prometheus-grafana 3000:80"
-  ["Loki"]="logging loki 3100:3100"
+  ["Loki"]="logging loki-loki-distributed-gateway 3100:80"
   ["Zipkin"]="tracing zipkin 9411:9411"
 )
 
