@@ -52,7 +52,9 @@ kubectl get secret --namespace monitoring prometheus-grafana -o jsonpath="{.data
 
 ## Logging
 kubectl create namespace logging
-helm install loki grafana/loki-stack --namespace logging
+helm install loki grafana/loki-distributed --namespace logging \
+  --set gateway.enabled=true \
+  --set gateway.service.type=ClusterIP
 
 kubectl create namespace tracing
 helm install zipkin zipkin/zipkin --namespace tracing
@@ -60,7 +62,7 @@ helm install zipkin zipkin/zipkin --namespace tracing
 ## PORT FORWARDING FOR LOCAL TESTING
 kubectl port-forward svc/prometheus-operated 9090:9090 -n monitoring --address 0.0.0.0
 kubectl port-forward svc/prometheus-grafana 3000:80 -n monitoring --address 0.0.0.0
-kubectl port-forward svc/loki 3100:3100 -n logging --address 0.0.0.0
+kubectl port-forward svc/loki-loki-distributed-gateway 3100:80 -n logging --address 0.0.0.0
 kubectl port-forward svc/zipkin 9411:9411 -n tracing --address 0.0.0.0
 ## Or you can run
 ./port-forwarding.sh
