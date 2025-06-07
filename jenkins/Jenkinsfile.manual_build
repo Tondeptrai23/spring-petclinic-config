@@ -150,7 +150,7 @@ pipeline {
                     withCredentials([file(credentialsId: env.KUBECONFIG_ID, variable: 'KUBECONFIG')]) {
                         sh """
                             export NAMESPACE=${namespace}
-                            envsubst < config-repo/prometheus/service-monitor.yaml \
+                            envsubst < config-repo/prometheus/monitor/service-monitor.yaml \
                               | kubectl --kubeconfig="$KUBECONFIG" apply -f - \
                                   --namespace="$NAMESPACE"
                         """
