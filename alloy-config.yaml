@@ -48,38 +48,31 @@ alloy:
 
         stage.match {
           selector = "{namespace=~\"dev.*|staging\", container=~\"visits-service|customers-service|vets-service|api-gateway|config-server|discovery-server|admin-server|genai-service\"}"
-          
-          stages = [
-            {
-              regex = {
-                expression = ".*(?P<level>TRACE|DEBUG|INFO|WARN|ERROR|FATAL).*"
-              }
-            },
-            {
-              // Drop noisy health check logs.
-              drop = {
-                source       = "log",
-                expression   = ".*actuator/health.*",
-              }
-            },
-            {
-              // Add final labels. namespace, pod, container are already set.
-              labels = {
-                values = {
-                  job   = "spring-boot-logs",
-                  level = "level",
-                }
-              }
-            },
-            {
-              metrics = {
-                "spring_logs_processed_total" = {
-                  action      = "inc",
-                  description = "Total Spring Boot logs processed",
-                }
-              }
-            }
-          ]
+          action   = "keep"
+        }
+
+        stage.regex {
+          expression = ".*(?P<level>TRACE|DEBUG|INFO|WARN|ERROR|FATAL).*"
+        }
+
+        stage.drop {
+          source     = "content"
+          expression = ".*actuator/health.*"
+        }
+
+        stage.labels {
+          values = {
+            job   = "spring-boot-logs"
+            level = "level"
+          }
+        }
+
+        stage.metrics {
+          metric.counter {
+            name        = "spring_logs_processed_total"
+            description = "Total Spring Boot logs processed"
+            action      = "inc"
+          }
         }
       }
 
