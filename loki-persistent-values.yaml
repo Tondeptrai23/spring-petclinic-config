@@ -13,7 +13,7 @@ backend:
 loki:
   schemaConfig:
     configs:
-      - from: 2025-06-09
+      - from: 2025-06-07
         store: standard
         object_store: filesystem
         schema: v13
