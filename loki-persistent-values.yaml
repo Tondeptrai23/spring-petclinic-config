@@ -1,3 +1,15 @@
+singleBinary:
+  replicas: 1
+
+write:
+  replicas: 0
+
+read:
+  replicas: 0
+
+backend:
+  replicas: 0
+
 loki:
   storage:
     type: "filesystem"
