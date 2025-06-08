@@ -5,87 +5,65 @@ metadata:
   namespace: logging
 data:
   config.alloy: |
-    // Logging configuration
     logging {
       level  = "info"
       format = "logfmt"
     }
 
-    // Loki client configuration
     loki.write "default" {
       endpoint {
-        url = "http://loki-loki-distributed-gateway:80/loki/api/v1/push"
+        url = "http://loki-loki-distributed-gateway.logging.svc.cluster.local/loki/api/v1/push"
+      }
+      external_labels = {
+        cluster = "my-k8s-cluster",
       }
     }
 
-    // Use file discovery with wildcard pattern
-    loki.source.file "container_logs" {
-      targets = [
-        {
-          __address__ = "localhost",
-          __path__    = "/var/log/containers/*.log",
-        },
-      ]
+    // Discover and tail container logs from the node using the Kubernetes API.
+    loki.source.kubernetes "container_logs" {
       forward_to = [loki.process.spring_logs.receiver]
     }
 
-    // Process and filter Spring Boot logs
     loki.process "spring_logs" {
       forward_to = [loki.write.default.receiver]
 
-      // Parse container log format first
-      stage.cri {}
-
-      stage.regex {
-        source     = "filename"
-        expression = "/var/log/containers/(?P<pod_name>[^_]+(?:-[^_]+)*?)_(?P<namespace>[^_]+)_(?P<container_name>[^-]+(?:-[^-]+)*?)-[^.]+\\.log"
-      }
-
       stage.match {
-        selector = "{namespace=~\"(dev.*|staging)\"}"
+        selector = "{k8s_namespace_name=~\"dev.*|staging\"}"
         action   = "keep"
       }
 
       stage.match {
-        selector = "{container_name=~\"(visits-service|customers-service|vets-service|api-gateway|config-server|discovery-server|admin-server|genai-service)\"}"
+        selector = "{k8s_container_name=~\"visits-service|customers-service|vets-service|api-gateway|config-server|discovery-server|admin-server|genai-service\"}"
         action   = "keep"
       }
 
-      // Add static labels first
-      stage.static_labels {
-        values = {
-          job = "spring-boot-logs",
+      // Parse structured JSON logs, common for Spring Boot.
+      stage.json {
+        expressions = { level = "level" }
+        source      = "log"
+      }
+
+      stage.drop {
+        source       = "log"
+        expression   = ".*actuator/health.*"
+      }
+
+      // Rename Kubernetes labels to shorter names.
+      stage.labelmap {
+        mapping = {
+          "k8s_pod_name"       = "pod",
+          "k8s_namespace_name" = "namespace",
+          "k8s_container_name" = "container",
         }
       }
 
-      // Add extracted labels from regex
       stage.labels {
         values = {
-          service   = "container_name",
-          namespace = "namespace", 
-          pod       = "pod_name",
-          container = "container_name",
-        }
-      }
-
-      stage.regex {
-        expression = ".*(TRACE|DEBUG|INFO|WARN|ERROR|FATAL).*"
-        source     = "content"
-      }
-
-      stage.labels {
-        values = {
+          job   = "spring-boot-logs",
           level = "level",
         }
       }
 
-      // Drop noisy health check logs
-      stage.drop {
-        expression = ".*actuator/health.*"
-        source     = "content"
-      }
-
-      // Add metric to count processed logs
       stage.metrics {
         metric.counter {
           name        = "spring_logs_processed_total"
