@@ -51,9 +51,10 @@ data:
         action   = "keep"
       }
 
+      // Add labels from extracted metadata
       stage.labels {
         values = {
-          service   = "",  // Will be set from container_name
+          service   = "",  // Will be set from container_name below
           namespace = "",
           pod       = "",
           container = "",
@@ -61,16 +62,27 @@ data:
         }
       }
 
+      // Set service label to match container name
       stage.template {
         source   = "container_name"
         template = "{{ .Value }}"
-        target   = "service"
+      }
+
+      stage.labels {
+        values = {
+          service = "",  // Gets value from template above
+        }
       }
 
       stage.template {
         source   = "pod_name"
         template = "{{ .Value }}"
-        target   = "pod"
+      }
+
+      stage.labels {
+        values = {
+          pod = "",  // Gets value from template above
+        }
       }
 
       stage.regex {
@@ -83,11 +95,13 @@ data:
         }
       }
 
+      // Drop noisy health check logs
       stage.drop {
         expression = ".*actuator/health.*"
         drop_counter_reason = "health_check"
       }
 
+      // Add metric to count processed logs
       stage.metrics {
         metric.counter {
           name = "spring_logs_processed_total"
