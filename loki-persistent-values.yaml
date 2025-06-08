@@ -11,6 +11,20 @@ backend:
   replicas: 0
 
 loki:
+  distributor:
+    securityContext:
+      fsGroup: 10001
+      runAsUser: 10001
+
+  ingester:
+    securityContext:
+      fsGroup: 10001
+      runAsUser: 10001
+
+  querier:
+    securityContext:
+      fsGroup: 10001
+      runAsUser: 10001
   schemaConfig:
     configs:
       - from: 2025-06-07
