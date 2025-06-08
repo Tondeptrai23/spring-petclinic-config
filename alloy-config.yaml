@@ -62,8 +62,8 @@ alloy:
 
         stage.labels {
           values = {
-            job   = "spring-boot-logs"
-            level = "level"
+            job   = "spring-boot-logs",
+            level = "level",
           }
         }
 
