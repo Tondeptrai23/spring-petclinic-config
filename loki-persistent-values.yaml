@@ -1,4 +1,6 @@
 loki:
+  storage:
+    type: "filesystem"
   persistence:
     enabled: true
     storageClassName: "standard"
