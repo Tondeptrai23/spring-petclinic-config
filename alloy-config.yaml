@@ -42,7 +42,7 @@ alloy:
       }
 
       loki.process "spring_logs" {
-        forward_to = [loki.write.default.receiver]
+        forward_to = [loki.write.loki.receiver]
 
         stage.drop {
           older_than          = "1h"
