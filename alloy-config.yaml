@@ -18,107 +18,81 @@ data:
       }
     }
 
-    // Kubernetes service discovery for pods
-    discovery.kubernetes "pods" {
-      role = "pod"
-    }
-
-    // Filter and relabel for Spring Boot services
-    discovery.relabel "spring_services" {
-      targets = discovery.kubernetes.pods.targets
-
-      // Keep pods from dev-* namespaces and staging
-      rule {
-        source_labels = ["__meta_kubernetes_namespace"]
-        regex         = "(dev.*|staging)"
-        action        = "keep"
-      }
-
-      // Keep only your Spring Boot services (exclude init containers)
-      rule {
-        source_labels = ["__meta_kubernetes_pod_label_app"]
-        regex         = "(visits-service|customers-service|vets-service|api-gateway|config-server|discovery-server|admin-server|genai-service)"
-        action        = "keep"
-      }
-
-      // Skip init containers and wait containers
-      rule {
-        source_labels = ["__meta_kubernetes_pod_container_name"]
-        regex         = "wait-for-.*"
-        action        = "drop"
-      }
-
-      // Keep only running pods
-      rule {
-        source_labels = ["__meta_kubernetes_pod_phase"]
-        regex         = "Running"
-        action        = "keep"
-      }
-
-      // Add service label
-      rule {
-        source_labels = ["__meta_kubernetes_pod_label_app"]
-        target_label  = "service"
-      }
-
-      // Add namespace label
-      rule {
-        source_labels = ["__meta_kubernetes_namespace"]
-        target_label  = "namespace"
-      }
-
-      // Add pod name label
-      rule {
-        source_labels = ["__meta_kubernetes_pod_name"]
-        target_label  = "pod"
-      }
-
-      // Add container name label
-      rule {
-        source_labels = ["__meta_kubernetes_pod_container_name"]
-        target_label  = "container"
-      }
-
-      // Construct proper log file path - this is the key fix
-      rule {
-        source_labels = ["__meta_kubernetes_pod_name", "__meta_kubernetes_namespace", "__meta_kubernetes_pod_container_name"]
-        separator     = "_"
-        target_label  = "__path__"
-        replacement   = "/var/log/containers/${1}_${2}_${3}-*.log"
-      }
-    }
-
-    // File source for container logs
+    // Use file discovery with wildcard pattern - much simpler and more reliable
     loki.source.file "container_logs" {
-      targets    = discovery.relabel.spring_services.output
+      targets = [
+        {
+          __address__ = "localhost",
+          __path__    = "/var/log/containers/*.log",
+        },
+      ]
       forward_to = [loki.process.spring_logs.receiver]
     }
 
-    // Process Spring Boot logs
+    // Process and filter Spring Boot logs
     loki.process "spring_logs" {
       forward_to = [loki.write.default.receiver]
 
-      // Parse container log format
+      // Parse container log format first
       stage.cri {}
 
-      // Extract Spring Boot log pattern
       stage.regex {
-        expression = "^(?P<timestamp>\\d{4}-\\d{2}-\\d{2}[T\\s]\\d{2}:\\d{2}:\\d{2}[.,]\\d{3})\\s*(?P<level>TRACE|DEBUG|INFO|WARN|ERROR|FATAL)\\s+(?P<thread>\\[.*?\\])?\\s*(?P<logger>\\S+)?\\s*[:-]?\\s*(?P<message>.*)"
+        source     = "filename"
+        expression = "/var/log/containers/(?P<pod_name>[^_]+(?:-[^_]+)*?)_(?P<namespace>[^_]+)_(?P<container_name>[^-]+(?:-[^-]+)*?)-[^.]+\\.log"
       }
 
-      // Add extracted labels
+      stage.match {
+        selector = "{namespace=~\"(dev.*|staging)\"}"
+        action   = "keep"
+      }
+
+      stage.match {
+        selector = "{container_name=~\"(visits-service|customers-service|vets-service|api-gateway|config-server|discovery-server|admin-server|genai-service)\"}"
+        action   = "keep"
+      }
+
       stage.labels {
         values = {
-          level = "",
-          thread = "",
-          logger = "",
+          service   = "",  // Will be set from container_name
+          namespace = "",
+          pod       = "",
+          container = "",
+          job       = "spring-boot-logs",
         }
       }
 
-      // Drop noisy health check logs
+      stage.template {
+        source   = "container_name"
+        template = "{{ .Value }}"
+        target   = "service"
+      }
+
+      stage.template {
+        source   = "pod_name"
+        template = "{{ .Value }}"
+        target   = "pod"
+      }
+
+      stage.regex {
+        expression = ".*(TRACE|DEBUG|INFO|WARN|ERROR|FATAL).*"
+      }
+
+      stage.labels {
+        values = {
+          level = "",
+        }
+      }
+
       stage.drop {
         expression = ".*actuator/health.*"
         drop_counter_reason = "health_check"
+      }
+
+      stage.metrics {
+        metric.counter {
+          name = "spring_logs_processed_total"
+          description = "Total Spring Boot logs processed"
+        }
       }
     }
 ---
