@@ -15,52 +15,45 @@ data:
         url = "http://loki-loki-distributed-gateway.logging.svc.cluster.local/loki/api/v1/push"
       }
       external_labels = {
-        cluster = "my-k8s-cluster",
+        cluster = "cluster-name-test",
       }
     }
 
-    // Discover and tail container logs from the node using the Kubernetes API.
-    loki.source.kubernetes "container_logs" {
-      forward_to = [loki.process.spring_logs.receiver]
+    discovery.kubernetes "pods" {
+      role = "pod"
+    }
+
+    loki.source.file "logs" {
+      targets    = discovery.kubernetes.pods.targets
+      forward_to = [loki.process.spring_logs.receiver]    
     }
 
     loki.process "spring_logs" {
       forward_to = [loki.write.default.receiver]
 
       stage.match {
-        selector = "{k8s_namespace_name=~\"dev.*|staging\"}"
+        selector = "{__meta_kubernetes_namespace=~\"dev.*|staging\", __meta_kubernetes_pod_container_name=~\"visits-service|customers-service|vets-service|api-gateway|config-server|discovery-server|admin-server|genai-service\"}"
         action   = "keep"
       }
 
-      stage.match {
-        selector = "{k8s_container_name=~\"visits-service|customers-service|vets-service|api-gateway|config-server|discovery-server|admin-server|genai-service\"}"
-        action   = "keep"
-      }
-
-      // Parse structured JSON logs, common for Spring Boot.
       stage.json {
         expressions = { level = "level" }
         source      = "log"
       }
 
+      // drop noisy logs
       stage.drop {
         source       = "log"
         expression   = ".*actuator/health.*"
       }
 
-      // Rename Kubernetes labels to shorter names.
-      stage.labelmap {
-        mapping = {
-          "k8s_pod_name"       = "pod",
-          "k8s_namespace_name" = "namespace",
-          "k8s_container_name" = "container",
-        }
-      }
-
       stage.labels {
         values = {
-          job   = "spring-boot-logs",
-          level = "level",
+          namespace = "__meta_kubernetes_namespace",
+          pod       = "__meta_kubernetes_pod_name",
+          container = "__meta_kubernetes_pod_container_name",
+          job       = "spring-boot-logs",
+          level     = "level",
         }
       }
 
