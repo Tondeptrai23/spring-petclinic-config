@@ -33,36 +33,43 @@ data:
 
       stage.match {
         selector = "{__meta_kubernetes_namespace=~\"dev.*|staging\", __meta_kubernetes_pod_container_name=~\"visits-service|customers-service|vets-service|api-gateway|config-server|discovery-server|admin-server|genai-service\"}"
-        action   = "keep"
-      }
-
-      stage.json {
-        expressions = { level = "level" }
-        source      = "log"
-      }
-
-      // drop noisy logs
-      stage.drop {
-        source       = "log"
-        expression   = ".*actuator/health.*"
-      }
-
-      stage.labels {
-        values = {
-          namespace = "__meta_kubernetes_namespace",
-          pod       = "__meta_kubernetes_pod_name",
-          container = "__meta_kubernetes_pod_container_name",
-          job       = "spring-boot-logs",
-          level     = "level",
-        }
-      }
-
-      stage.metrics {
-        metric.counter {
-          name        = "spring_logs_processed_total"
-          description = "Total Spring Boot logs processed"
-          action      = "inc"
-        }
+        stages = [
+          {
+            // Parse structured JSON logs.
+            json = {
+              expressions = { level = "level" },
+              source      = "log",
+            }
+          },
+          {
+            // Drop noisy health check logs.
+            drop = {
+              source       = "log",
+              expression   = ".*actuator/health.*",
+            }
+          },
+          {
+            // Create new, cleaner labels from discovery metadata.
+            labels = {
+              values = {
+                namespace = "__meta_kubernetes_namespace",
+                pod       = "__meta_kubernetes_pod_name",
+                container = "__meta_kubernetes_pod_container_name",
+                job       = "spring-boot-logs",
+                level     = "level",
+              }
+            }
+          },
+          {
+            // Add a metric to count processed logs.
+            metrics = {
+              "spring_logs_processed_total" = {
+                action      = "inc",
+                description = "Total Spring Boot logs processed",
+              }
+            }
+          }
+        ]
       }
     }
 ---
