@@ -18,7 +18,7 @@ data:
       }
     }
 
-    // Use file discovery with wildcard pattern - much simpler and more reliable
+    // Use file discovery with wildcard pattern
     loki.source.file "container_logs" {
       targets = [
         {
@@ -51,61 +51,46 @@ data:
         action   = "keep"
       }
 
-      // Add labels from extracted metadata
-      stage.labels {
+      // Add static labels first
+      stage.static_labels {
         values = {
-          service   = "",  // Will be set from container_name below
-          namespace = "",
-          pod       = "",
-          container = "",
-          job       = "spring-boot-logs",
+          job = "spring-boot-logs",
         }
       }
 
-      // Set service label to match container name
-      stage.template {
-        source   = "container_name"
-        template = "{{ .Value }}"
-      }
-
+      // Add extracted labels from regex
       stage.labels {
         values = {
-          service = "",  // Gets value from template above
-        }
-      }
-
-      stage.template {
-        source   = "pod_name"
-        template = "{{ .Value }}"
-      }
-
-      stage.labels {
-        values = {
-          pod = "",  // Gets value from template above
+          service   = "container_name",
+          namespace = "namespace", 
+          pod       = "pod_name",
+          container = "container_name",
         }
       }
 
       stage.regex {
         expression = ".*(TRACE|DEBUG|INFO|WARN|ERROR|FATAL).*"
+        source     = "content"
       }
 
       stage.labels {
         values = {
-          level = "",
+          level = "level",
         }
       }
 
       // Drop noisy health check logs
       stage.drop {
         expression = ".*actuator/health.*"
-        drop_counter_reason = "health_check"
+        source     = "content"
       }
 
       // Add metric to count processed logs
       stage.metrics {
         metric.counter {
-          name = "spring_logs_processed_total"
+          name        = "spring_logs_processed_total"
           description = "Total Spring Boot logs processed"
+          action      = "inc"
         }
       }
     }
