@@ -1,155 +1,96 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: alloy-config
-  namespace: logging
-data:
-  config.alloy: |
-    logging {
-      level  = "info"
-      format = "logfmt"
-    }
-
-    loki.write "default" {
-      endpoint {
-        url = "http://loki-loki-distributed-gateway.logging.svc.cluster.local/loki/api/v1/push"
+alloy:
+  configMap:
+    content: |-
+      logging {
+        level = "info"
+        format = "logfmt"
       }
-      external_labels = {
-        cluster = "cluster-name-test",
+
+      loki.write "default" {
+        endpoint {
+          url = "http://loki-loki-distributed-gateway.logging.svc.cluster.local/loki/api/v1/push"
+        }
+        external_labels = {
+          cluster = "cluster-name-test",
+        }
       }
-    }
 
-    discovery.kubernetes "pods" {
-      role = "pod"
-    }
+      discovery.kubernetes "pods" {
+        role = "pod"
+      }
 
-    loki.source.file "logs" {
-      targets    = discovery.kubernetes.pods.targets
-      forward_to = [loki.process.spring_logs.receiver]    
-    }
+      discovery.relabel "relabeled_pods" {
+        targets = discovery.kubernetes.pods.targets
 
-    loki.process "spring_logs" {
-      forward_to = [loki.write.default.receiver]
+        rule {
+          source_labels = ["__meta_kubernetes_namespace"]
+          target_label  = "namespace"
+        }
 
-      stage.match {
-        selector = "{__meta_kubernetes_namespace=~\"dev.*|staging\", __meta_kubernetes_pod_container_name=~\"visits-service|customers-service|vets-service|api-gateway|config-server|discovery-server|admin-server|genai-service\"}"
-        stages = [
-          {
-            // Parse structured JSON logs.
-            json = {
-              expressions = { level = "level" },
-              source      = "log",
-            }
-          },
-          {
-            // Drop noisy health check logs.
-            drop = {
-              source       = "log",
-              expression   = ".*actuator/health.*",
-            }
-          },
-          {
-            // Create new, cleaner labels from discovery metadata.
-            labels = {
-              values = {
-                namespace = "__meta_kubernetes_namespace",
-                pod       = "__meta_kubernetes_pod_name",
-                container = "__meta_kubernetes_pod_container_name",
-                job       = "spring-boot-logs",
-                level     = "level",
+        rule {
+          source_labels = ["__meta_kubernetes_pod_container_name"]
+          target_label  = "container"
+        }
+        
+        rule {
+          source_labels = ["__meta_kubernetes_pod_name"]
+          target_label  = "pod"
+        }
+      }
+
+      loki.source.file "logs" {
+        targets    = discovery.relabel.relabeled_pods.output
+        forward_to = [loki.process.spring_logs.receiver]
+      }
+
+      loki.process "spring_logs" {
+        forward_to = [loki.write.default.receiver]
+
+        stage.match {
+          selector = "{namespace=~\"dev.*|staging\", container=~\"visits-service|customers-service|vets-service|api-gateway|config-server|discovery-server|admin-server|genai-service\"}"
+          
+          stages = [
+            {
+              regex = {
+                expression = ".*(?P<level>TRACE|DEBUG|INFO|WARN|ERROR|FATAL).*"
+              }
+            },
+            {
+              // Drop noisy health check logs.
+              drop = {
+                source       = "log",
+                expression   = ".*actuator/health.*",
+              }
+            },
+            {
+              // Add final labels. namespace, pod, container are already set.
+              labels = {
+                values = {
+                  job   = "spring-boot-logs",
+                  level = "level",
+                }
+              }
+            },
+            {
+              metrics = {
+                "spring_logs_processed_total" = {
+                  action      = "inc",
+                  description = "Total Spring Boot logs processed",
+                }
               }
             }
-          },
-          {
-            // Add a metric to count processed logs.
-            metrics = {
-              "spring_logs_processed_total" = {
-                action      = "inc",
-                description = "Total Spring Boot logs processed",
-              }
-            }
-          }
-        ]
+          ]
+        }
       }
-    }
----
-# DaemonSet and other resources remain the same
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  name: alloy
-  namespace: logging
-spec:
-  selector:
-    matchLabels:
-      name: alloy
-  template:
-    metadata:
-      labels:
-        name: alloy
-    spec:
-      serviceAccountName: alloy
-      containers:
-        - name: alloy
-          image: grafana/alloy:latest
-          args:
-            - run
-            - /etc/alloy/config.alloy
-            - --server.http.listen-addr=0.0.0.0:12345
-          volumeMounts:
-            - name: config
-              mountPath: /etc/alloy
-            - name: varlog
-              mountPath: /var/log
-              readOnly: true
-            - name: varlibdockercontainers
-              mountPath: /var/lib/docker/containers
-              readOnly: true
-          ports:
-            - containerPort: 12345
-              name: http-metrics
-          securityContext:
-            runAsUser: 0
-      volumes:
-        - name: config
-          configMap:
-            name: alloy-config
-        - name: varlog
-          hostPath:
-            path: /var/log
-        - name: varlibdockercontainers
-          hostPath:
-            path: /var/lib/docker/containers
-      tolerations:
-        - operator: Exists
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: alloy
-  namespace: logging
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: alloy
-rules:
-  - apiGroups: [""]
-    resources: ["pods", "nodes", "services", "endpoints"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: [""]
-    resources: ["nodes/proxy"]
-    verbs: ["get"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: alloy
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: alloy
-subjects:
-  - kind: ServiceAccount
-    name: alloy
-    namespace: logging
+
+  mounts:
+    varlog: true
+    dockercontainers: true
+
+  resources:
+    limits:
+      cpu: 200m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
