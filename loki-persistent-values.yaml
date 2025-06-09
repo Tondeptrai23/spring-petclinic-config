@@ -35,15 +35,22 @@ loki:
         object_store: filesystem
         schema: v13
         index:
-          prefix: index_
+          prefix: loki_index_
           period: 24h
   storage:
     type: "filesystem"
-  persistence:
-    enabled: true
-    storageClassName: "standard"
-    size: 10Gi
-    access_mode: ReadWriteOnce
+    bucketNames:
+      chunks: chunks
+      ruler: ruler
+      admin: admin
+  storage_config:
+    filesystem:
+      directory: /tmp/loki/chunks
+  # persistence:
+  #   enabled: true
+  #   storageClassName: "standard"
+  #   size: 10Gi
+  #   access_mode: ReadWriteOnce
 
 gateway:
   enabled: true
