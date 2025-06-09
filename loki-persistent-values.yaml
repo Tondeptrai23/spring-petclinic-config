@@ -1,5 +1,5 @@
 singleBinary:
-  replicas: 1
+  replicas: 0
 
 write:
   replicas: 0
@@ -12,20 +12,23 @@ backend:
 
 loki:
   distributor:
+    replicas: 1
     securityContext:
       fsGroup: 10001
       runAsUser: 10001
 
   ingester:
+    replicas: 1
     securityContext:
       fsGroup: 10001
       runAsUser: 10001
 
   querier:
+    replicas: 1
     securityContext:
       fsGroup: 10001
       runAsUser: 10001
-  schemaConfig:
+  schema_config:
     configs:
       - from: 2025-06-07
         store: boltdb-shipper
@@ -40,6 +43,7 @@ loki:
     enabled: true
     storageClassName: "standard"
     size: 10Gi
+    access_mode: ReadWriteOnce
 
 gateway:
   enabled: true
