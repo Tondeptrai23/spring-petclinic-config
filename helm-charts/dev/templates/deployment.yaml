@@ -47,6 +47,26 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+          {{- if $.Values.zipkin.enabled }}
+            - name: ZIPKIN_BASE_URL
+              value: {{ $.Values.globalEnv.ZIPKIN_BASE_URL | quote }}
+            - name: MANAGEMENT_TRACING_SAMPLING_PROBABILITY
+              value: {{ $.Values.globalEnv.MANAGEMENT_TRACING_SAMPLING_PROBABILITY | quote }}
+            - name: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
+              value: {{ $.Values.globalEnv.MANAGEMENT_ZIPKIN_TRACING_ENDPOINT | quote }}
+            - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+              value: {{ $.Values.globalEnv.MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE | quote }}
+            - name: LOGGING_PATTERN_LEVEL
+              value: {{ $.Values.globalEnv.LOGGING_PATTERN_LEVEL | quote }}
+            - name: LOGGING_LEVEL_IO_MICROMETER_TRACING
+              value: {{ $.Values.globalEnv.LOGGING_LEVEL_IO_MICROMETER_TRACING | quote }}
+            - name: SPRING_APPLICATION_NAME
+              value: {{ $config.containerName | quote }}
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "true"
+            - name: MANAGEMENT_ZIPKIN_TRACING_ENABLED
+              value: "true"
+          {{- end }}
           resources:
             limits:
               memory: "300Mi" 

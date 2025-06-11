@@ -5,7 +5,7 @@ images:
   config-server:
     image: mikenam/spring-petclinic-config-server
     tag: latest
-    
+
   customers-service:
     image: mikenam/spring-petclinic-customers-service
     tag: latest
@@ -29,49 +29,100 @@ images:
   api-gateway:
     image: mikenam/spring-petclinic-api-gateway
     tag: latest
-
+    
   admin-server:
     image: mikenam/spring-petclinic-admin-server
     tag: latest
+
+# ZIPKIN TRACING CONFIGURATION
+zipkin:
+  enabled: true
+  endpoint: "http://zipkin.tracing.svc.cluster.local:9411"
+
+# GLOBAL ENVIRONMENT VARIABLES FOR ALL SERVICES
+globalEnv:
+  ZIPKIN_BASE_URL: "http://zipkin.tracing.svc.cluster.local:9411"
+  MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+  MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "http://zipkin.tracing.svc.cluster.local:9411/api/v2/spans"
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics,prometheus,httpexchanges"
+  LOGGING_PATTERN_LEVEL: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+  LOGGING_LEVEL_IO_MICROMETER_TRACING: "DEBUG"
 
 services:
   config-server:
     containerName: config-server
     port: 8888
     metrics: "false"
-    
+    env:
+      SPRING_APPLICATION_NAME: "config-server"
+      
   customers-service:
     containerName: customers-service
     port: 8081
     dependOnConfigServer: true
     metrics: "true"
-
+    env:
+      SPRING_APPLICATION_NAME: "customers-service"
+      ZIPKIN_BASE_URL: "http://zipkin.tracing.svc.cluster.local:9411"
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "http://zipkin.tracing.svc.cluster.local:9411/api/v2/spans"
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics,prometheus,httpexchanges"
+      
   discovery-server:
     containerName: discovery-server
     port: 8761
     dependOnConfigServer: true
     metrics: "true"
-
+    env:
+      SPRING_APPLICATION_NAME: "discovery-server"
+      ZIPKIN_BASE_URL: "http://zipkin.tracing.svc.cluster.local:9411"
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "http://zipkin.tracing.svc.cluster.local:9411/api/v2/spans"
+      
   visits-service:
     containerName: visits-service
     port: 8082
     dependOnConfigServer: true
     metrics: "true"
-
+    env:
+      SPRING_APPLICATION_NAME: "visits-service"
+      ZIPKIN_BASE_URL: "http://zipkin.tracing.svc.cluster.local:9411"
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "http://zipkin.tracing.svc.cluster.local:9411/api/v2/spans"
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics,prometheus,httpexchanges"
+      
   vets-service:
     containerName: vets-service
     port: 8083
     dependOnConfigServer: true
     metrics: "true"
-
+    env:
+      SPRING_APPLICATION_NAME: "vets-service"
+      ZIPKIN_BASE_URL: "http://zipkin.tracing.svc.cluster.local:9411"
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "http://zipkin.tracing.svc.cluster.local:9411/api/v2/spans"
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics,prometheus,httpexchanges"
+      
   api-gateway:
     containerName: api-gateway
     port: 8080
     dependOnConfigServer: true
     metrics: "true"
-
+    env:
+      SPRING_APPLICATION_NAME: "api-gateway"
+      ZIPKIN_BASE_URL: "http://zipkin.tracing.svc.cluster.local:9411"
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "http://zipkin.tracing.svc.cluster.local:9411/api/v2/spans"
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics,prometheus,httpexchanges"
+      LOGGING_LEVEL_IO_MICROMETER_TRACING: "DEBUG"
+      
   admin-server:
     containerName: admin-server
     port: 9090
     dependOnConfigServer: true
     metrics: "true"
+    env:
+      SPRING_APPLICATION_NAME: "admin-server"
+      ZIPKIN_BASE_URL: "http://zipkin.tracing.svc.cluster.local:9411"
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "http://zipkin.tracing.svc.cluster.local:9411/api/v2/spans"

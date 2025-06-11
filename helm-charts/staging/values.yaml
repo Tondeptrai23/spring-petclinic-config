@@ -75,3 +75,15 @@ services:
     port: 9090
     dependOnConfigServer: true
     metrics: "true"
+
+zipkin:
+  enabled: true
+  endpoint: "http://zipkin.tracing.svc.cluster.local:9411"
+  
+globalEnv:
+  ZIPKIN_BASE_URL: "http://zipkin.tracing.svc.cluster.local:9411"
+  MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+  MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "http://zipkin.tracing.svc.cluster.local:9411/api/v2/spans"
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics,prometheus,httpexchanges"
+  LOGGING_PATTERN_LEVEL: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+  LOGGING_LEVEL_IO_MICROMETER_TRACING: "DEBUG"
