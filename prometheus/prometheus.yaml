@@ -3,6 +3,8 @@ prometheus:
     serviceMonitorNamespaceSelector: {}
     podMonitorNamespaceSelector: {}
     maximumStartupDurationSeconds: 60
+    enableFeatures:
+      - exemplar-storage
 
 kubeEtcd:
   enabled: false
@@ -12,3 +14,6 @@ kubeScheduler:
 kubeProxy:
   serviceMonitor:
     enabled: false
+
+rule_files:
+  - ./rules.yaml
