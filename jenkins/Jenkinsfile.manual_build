@@ -18,6 +18,7 @@ pipeline {
         string(name: 'CUSTOMERS_SERVICE_BRANCH',   defaultValue: '',  description: 'Branch for customers-service')
         string(name: 'VETS_SERVICE_BRANCH',        defaultValue: '',  description: 'Branch for vets-service')
         string(name: 'VISITS_SERVICE_BRANCH',      defaultValue: '',  description: 'Branch for visits-service')
+		string(name: 'ADMIN_SERVER_BRANCH',        defaultValue: '',  description: 'Branch for admin-server')
 
         // New parameter for cleanup delay
         string(
@@ -73,7 +74,8 @@ pipeline {
                             'api-gateway'       : params.API_GATEWAY_BRANCH,
                             'customers-service' : params.CUSTOMERS_SERVICE_BRANCH,
                             'vets-service'      : params.VETS_SERVICE_BRANCH,
-                            'visits-service'    : params.VISITS_SERVICE_BRANCH
+                            'visits-service'    : params.VISITS_SERVICE_BRANCH,
+							'admin-server'       : params.ADMIN_SERVER_BRANCH
                         ]
 
                         branchParams.each { svc, branchParam ->
@@ -112,7 +114,8 @@ pipeline {
                         'api-gateway',
                         'customers-service',
                         'vets-service',
-                        'visits-service'
+                        'visits-service',
+						'admin-server'
                     ]
 
                     def setArgs = SERVICES.collect { svc ->
