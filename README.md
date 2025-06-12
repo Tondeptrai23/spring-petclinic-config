@@ -53,7 +53,7 @@ kubectl create configmap grafana-datasources \
   -n monitoring
 
 ## Upgrade prometheus rules
-kubectl apply -f prometheus/prometheus-rules.yaml -n monitoring
+kubectl apply -f prometheus/rules.yaml -n monitoring
 
 
 
