@@ -7,5 +7,5 @@ datasources:
     isDefault: true
     jsonData:
       exemplarTraceIdDestinations:
-        - name: TraceID
+        - name: trace_id
           datasourceUid: zipkin
