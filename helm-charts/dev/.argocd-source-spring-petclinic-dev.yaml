@@ -16,7 +16,7 @@ helm:
     value: mikenam/spring-petclinic-vets-service
     forcestring: true
   - name: images.vets-service.tag
-    value: c2f36b2
+    value: 7d7f338
     forcestring: true
   - name: images.visits-service.image
     value: mikenam/spring-petclinic-visits-service
@@ -40,13 +40,13 @@ helm:
     value: mikenam/spring-petclinic-config-server
     forcestring: true
   - name: images.config-server.tag
-    value: 7d7f338
+    value: feat-add-zipkin-6a3d1a8
     forcestring: true
   - name: images.discovery-server.image
     value: mikenam/spring-petclinic-discovery-server
     forcestring: true
   - name: images.discovery-server.tag
-    value: 7d7f338
+    value: feat-add-zipkin-6a3d1a8
     forcestring: true
   - name: images.genai-service.image
     value: mikenam/spring-petclinic-genai-service
