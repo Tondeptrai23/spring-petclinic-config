@@ -47,6 +47,16 @@ helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
     -f prometheus/prometheus.yaml \
 	-f prometheus/grafana.yaml
 
+## Upgrade Grafana datasource
+kubectl create configmap grafana-datasources \
+  --from-file=exemplar-datasource.yaml=prometheus/exemplar-datasource.yaml \
+  -n monitoring
+
+## Upgrade prometheus rules
+kubectl apply -f prometheus/prometheus-rules.yaml -n monitoring
+
+
+
 ## GET ADMIN PASSWORD TO ACCESS GRAFANA
 kubectl get secret --namespace monitoring prometheus-grafana -o jsonpath="{.data.admin-password}" | base64 --decode; echo
 

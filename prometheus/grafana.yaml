@@ -18,3 +18,6 @@ grafana:
       mountPath: /etc/grafana/provisioning/datasources
       configMap: grafana-datasources
       readOnly: true
+  persistence:
+    enabled: true
+    size: 500Mi
