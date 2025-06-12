@@ -1,0 +1,20 @@
+grafana:
+  additionalDataSources:
+    - name: Prometheus
+      type: prometheus
+      access: proxy
+      url: http://prometheus-operated.monitoring.svc:9090
+      isDefault: true
+      jsonData:
+        exemplarTraceIdDestinations:
+          - name: TraceID
+            datasourceUid: zipkin
+  sidecar:
+    datasources:
+      enabled: true
+      label: grafana_datasource
+  extraConfigmapMounts:
+    - name: grafana-datasources
+      mountPath: /etc/grafana/provisioning/datasources
+      configMap: grafana-datasources
+      readOnly: true

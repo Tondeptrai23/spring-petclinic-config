@@ -44,7 +44,8 @@ helm repo update
 kubectl create namespace monitoring
 helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
     --namespace monitoring \
-    -f prometheus/prometheus.yaml
+    -f prometheus/prometheus.yaml \
+	-f prometheus/grafana.yaml
 
 ## GET ADMIN PASSWORD TO ACCESS GRAFANA
 kubectl get secret --namespace monitoring prometheus-grafana -o jsonpath="{.data.admin-password}" | base64 --decode; echo
