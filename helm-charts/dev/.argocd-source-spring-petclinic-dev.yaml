@@ -40,7 +40,7 @@ helm:
     value: mikenam/spring-petclinic-config-server
     forcestring: true
   - name: images.config-server.tag
-    value: f0085b5
+    value: feat-add-zipkin-1a263a5
     forcestring: true
   - name: images.discovery-server.image
     value: mikenam/spring-petclinic-discovery-server
