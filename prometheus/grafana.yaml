@@ -1,5 +1,17 @@
 grafana:
   additionalDataSources:
+    - name: Zipkin
+      type: zipkin
+      access: proxy
+      url: http://zipkin.tracing.svc.cluster.local:9411
+      isDefault: false
+
+    - name: Loki
+      type: loki
+      access: proxy
+      url: http://loki-loki-distributed-gateway.logging.svc.cluster.local
+      isDefault: false
+      
     - name: Prometheus
       type: prometheus
       access: proxy
@@ -13,11 +25,6 @@ grafana:
     datasources:
       enabled: true
       label: grafana_datasource
-  extraConfigmapMounts:
-    - name: grafana-datasources
-      mountPath: /etc/grafana/provisioning/datasources
-      configMap: grafana-datasources
-      readOnly: true
   persistence:
     enabled: true
     size: 500Mi
