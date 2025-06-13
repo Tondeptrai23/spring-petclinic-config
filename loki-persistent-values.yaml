@@ -31,16 +31,15 @@ loki:
       fsGroup: 10001
       runAsUser: 10001
     persistence:
-      enabled: true
-      storageClassName: "standard"
-      size: 10Gi
+      enabled: false
     extraVolumeMounts:
-      - name: storage
+      - name: loki-storage
         mountPath: /var/loki
     extraVolumes:
-      - name: storage
-        persistentVolumeClaim:
-          claimName: loki-ingester
+      - name: loki-storage
+        hostPath:
+          path: /data/loki/ingester
+          type: DirectoryOrCreate
 
   querier:
     replicas: 1
@@ -48,16 +47,15 @@ loki:
       fsGroup: 10001
       runAsUser: 10001
     persistence:
-      enabled: true
-      storageClassName: "standard"
-      size: 5Gi
+      enabled: false
     extraVolumeMounts:
-      - name: storage
+      - name: loki-storage
         mountPath: /var/loki
     extraVolumes:
-      - name: storage
-        persistentVolumeClaim:
-          claimName: loki-querier
+      - name: loki-storage
+        hostPath:
+          path: /data/loki/querier
+          type: DirectoryOrCreate
 
   schema_config:
     configs:
