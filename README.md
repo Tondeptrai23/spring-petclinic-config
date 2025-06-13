@@ -44,13 +44,7 @@ helm repo update
 kubectl create namespace monitoring
 helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
     --namespace monitoring \
-    -f prometheus/prometheus.yaml \
-	-f prometheus/grafana.yaml
-
-## Upgrade Grafana datasource
-kubectl create configmap grafana-datasources \
-  --from-file=exemplar-datasource.yaml=prometheus/exemplar-datasource.yaml \
-  -n monitoring
+    -f prometheus/prometheus.yaml
 
 ## Upgrade prometheus rules
 kubectl apply -f prometheus/rules.yaml -n monitoring
