@@ -11,6 +11,14 @@ backend:
   replicas: 0
 
 loki:
+  commonConfig:
+    path_prefix: /var/loki
+    replication_factor: 1
+    storage:
+      filesystem:
+        chunks_directory: /var/loki/chunks
+        rules_directory: /var/loki/rules
+
   distributor:
     replicas: 1
     securityContext:
@@ -22,6 +30,10 @@ loki:
     securityContext:
       fsGroup: 10001
       runAsUser: 10001
+    persistence:
+      enabled: true
+      storageClassName: "standard"
+      size: 10Gi
 
   querier:
     replicas: 1
@@ -44,13 +56,13 @@ loki:
       ruler: ruler
       admin: admin
   storage_config:
+    boltdb_shipper:
+      shared_store: filesystem
+      active_index_directory: /var/loki/index
+      cache_location: /var/loki/cache
+      cache_ttl: 24h
     filesystem:
-      directory: /tmp/loki/chunks
-  # persistence:
-  #   enabled: true
-  #   storageClassName: "standard"
-  #   size: 10Gi
-  #   access_mode: ReadWriteOnce
+      directory: /var/loki/chunks
 
 gateway:
   enabled: true
