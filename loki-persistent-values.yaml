@@ -34,12 +34,31 @@ loki:
       enabled: true
       storageClassName: "standard"
       size: 10Gi
+    extraVolumeMounts:
+      - name: storage
+        mountPath: /var/loki
+    extraVolumes:
+      - name: storage
+        persistentVolumeClaim:
+          claimName: loki-ingester
 
   querier:
     replicas: 1
     securityContext:
       fsGroup: 10001
       runAsUser: 10001
+    persistence:
+      enabled: true
+      storageClassName: "standard"
+      size: 5Gi
+    extraVolumeMounts:
+      - name: storage
+        mountPath: /var/loki
+    extraVolumes:
+      - name: storage
+        persistentVolumeClaim:
+          claimName: loki-querier
+
   schema_config:
     configs:
       - from: 2025-06-07
@@ -49,12 +68,14 @@ loki:
         index:
           prefix: loki_index_
           period: 24h
+
   storage:
     type: "filesystem"
     bucketNames:
       chunks: chunks
       ruler: ruler
       admin: admin
+
   storage_config:
     boltdb_shipper:
       shared_store: filesystem
