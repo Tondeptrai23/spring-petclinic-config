@@ -10,6 +10,10 @@ read:
 backend:
   replicas: 0
 
+nameOverride: ""
+fullnameOverride: ""
+namespace: logging
+
 loki:
   commonConfig:
     path_prefix: /var/loki
@@ -28,10 +32,11 @@ loki:
     persistence:
       enabled: true
       size: 10Gi
-      storageClass: "standard" # Use your cluster's storage class
+      storageClass: "standard"
+      existingClaim: loki-ingester-storage
     extraVolumeMounts:
       - name: loki-storage
-        mountPath: /var/loki
+        mountPath: /var/loki/ingester
     extraVolumes:
       - name: loki-storage
         persistentVolumeClaim:
@@ -46,10 +51,11 @@ loki:
     persistence:
       enabled: true
       size: 10Gi
-      storageClass: "standard" # Use your cluster's storage class
+      storageClass: "standard"
+      existingClaim: loki-querier-storage
     extraVolumeMounts:
       - name: loki-storage
-        mountPath: /var/loki
+        mountPath: /var/loki/querier
     extraVolumes:
       - name: loki-storage
         persistentVolumeClaim:
@@ -58,11 +64,11 @@ loki:
   storage_config:
     boltdb_shipper:
       shared_store: filesystem
-      active_index_directory: /var/loki/index
-      cache_location: /var/loki/cache
+      active_index_directory: /var/loki/ingester/index
+      cache_location: /var/loki/ingester/cache
       cache_ttl: 24h
     filesystem:
-      directory: /var/loki/chunks
+      directory: /var/loki/ingester/chunks
 
 gateway:
   enabled: true
