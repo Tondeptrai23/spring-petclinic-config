@@ -28,7 +28,7 @@ helm:
     value: mikenam/spring-petclinic-admin-server
     forcestring: true
   - name: images.admin-server.tag
-    value: test-trace-metric-43a18b9
+    value: ffbb0e2
     forcestring: true
   - name: images.api-gateway.image
     value: mikenam/spring-petclinic-api-gateway
