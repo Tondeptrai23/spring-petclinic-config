@@ -3,17 +3,9 @@ singleBinary:
 
 write:
   replicas: 1
-  persistence:
-    enabled: true
-    size: 10Gi
-    storageClass: "standard"
 
 read:
   replicas: 1
-  persistence:
-    enabled: true
-    size: 10Gi
-    storageClass: "standard"
 
 backend:
   replicas: 1
@@ -38,8 +30,7 @@ loki:
     replicas: 1
     persistence:
       enabled: true
-      size: 10Gi
-      storageClass: "standard"
+      existingClaim: loki-ingester-storage
     extraVolumeMounts:
       - name: storage
         mountPath: /var/loki
@@ -52,8 +43,7 @@ loki:
     replicas: 1
     persistence:
       enabled: true
-      size: 10Gi
-      storageClass: "standard"
+      existingClaim: loki-querier-storage
     extraVolumeMounts:
       - name: storage
         mountPath: /var/loki
