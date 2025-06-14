@@ -3,9 +3,17 @@ singleBinary:
 
 write:
   replicas: 1
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: "standard"
 
 read:
   replicas: 1
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: "standard"
 
 backend:
   replicas: 1
@@ -25,60 +33,43 @@ loki:
 
   storage:
     type: filesystem
-    bucketNames:
-      chunks: chunks
-      ruler: ruler
-      admin: admin
-    filesystem:
-      chunks_directory: /var/loki/chunks
-      rules_directory: /var/loki/rules
 
   ingester:
     replicas: 1
-    securityContext:
-      fsGroup: 10001
-      runAsUser: 10001
-      fsGroupChangePolicy: "OnRootMismatch"
     persistence:
       enabled: true
       size: 10Gi
       storageClass: "standard"
-      existingClaim: loki-ingester-storage
     extraVolumeMounts:
-      - name: loki-storage
-        mountPath: /var/loki/ingester
+      - name: storage
+        mountPath: /var/loki
     extraVolumes:
-      - name: loki-storage
+      - name: storage
         persistentVolumeClaim:
           claimName: loki-ingester-storage
 
   querier:
     replicas: 1
-    securityContext:
-      fsGroup: 10001
-      runAsUser: 10001
-      fsGroupChangePolicy: "OnRootMismatch"
     persistence:
       enabled: true
       size: 10Gi
       storageClass: "standard"
-      existingClaim: loki-querier-storage
     extraVolumeMounts:
-      - name: loki-storage
-        mountPath: /var/loki/querier
+      - name: storage
+        mountPath: /var/loki
     extraVolumes:
-      - name: loki-storage
+      - name: storage
         persistentVolumeClaim:
           claimName: loki-querier-storage
 
   storage_config:
     boltdb_shipper:
       shared_store: filesystem
-      active_index_directory: /var/loki/ingester/index
-      cache_location: /var/loki/ingester/cache
+      active_index_directory: /var/loki/index
+      cache_location: /var/loki/cache
       cache_ttl: 24h
     filesystem:
-      directory: /var/loki/ingester/chunks
+      directory: /var/loki/chunks
 
 gateway:
   enabled: true
