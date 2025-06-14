@@ -19,12 +19,6 @@ loki:
         chunks_directory: /var/loki/chunks
         rules_directory: /var/loki/rules
 
-  distributor:
-    replicas: 1
-    securityContext:
-      fsGroup: 10001
-      runAsUser: 10001
-
   ingester:
     replicas: 1
     securityContext:
@@ -34,7 +28,17 @@ loki:
       enabled: false
     extraVolumeMounts:
       - name: loki-storage
-        mountPath: /var/loki
+        mountPath: /var/loki/chunks
+        subPath: chunks
+      - name: loki-storage
+        mountPath: /var/loki/index
+        subPath: index
+      - name: loki-storage
+        mountPath: /var/loki/cache
+        subPath: cache
+      - name: loki-storage
+        mountPath: /var/loki/rules
+        subPath: rules
     extraVolumes:
       - name: loki-storage
         hostPath:
@@ -50,29 +54,22 @@ loki:
       enabled: false
     extraVolumeMounts:
       - name: loki-storage
-        mountPath: /var/loki
+        mountPath: /var/loki/chunks
+        subPath: chunks
+      - name: loki-storage
+        mountPath: /var/loki/index
+        subPath: index
+      - name: loki-storage
+        mountPath: /var/loki/cache
+        subPath: cache
+      - name: loki-storage
+        mountPath: /var/loki/rules
+        subPath: rules
     extraVolumes:
       - name: loki-storage
         hostPath:
           path: /data/loki/querier
           type: DirectoryOrCreate
-
-  schema_config:
-    configs:
-      - from: 2025-06-07
-        store: boltdb-shipper
-        object_store: filesystem
-        schema: v13
-        index:
-          prefix: loki_index_
-          period: 24h
-
-  storage:
-    type: "filesystem"
-    bucketNames:
-      chunks: chunks
-      ruler: ruler
-      admin: admin
 
   storage_config:
     boltdb_shipper:
