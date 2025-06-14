@@ -1,4 +1,46 @@
 apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: loki-ingester-pv
+spec:
+  storageClassName: local-path-immediate
+  capacity:
+    storage: 10Gi  
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /mnt/storage/loki-ingester  
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - petclinic-worker 
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: loki-querier-pv
+spec:
+  storageClassName: local-path-immediate
+  capacity:
+    storage: 10Gi  
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /mnt/storage/loki-querier
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - petclinic-worker
+---
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: loki-ingester-storage
@@ -9,7 +51,7 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  storageClassName: standard
+  storageClassName: local-path-immediate
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -22,4 +64,4 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  storageClassName: standard
+  storageClassName: local-path-immediate

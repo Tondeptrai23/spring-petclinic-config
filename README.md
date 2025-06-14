@@ -59,7 +59,10 @@ kubectl get secret --namespace monitoring prometheus-grafana -o jsonpath="{.data
 kubectl create namespace logging
 helm install loki grafana/loki-distributed --namespace logging \
   --set gateway.enabled=true \
-  --set gateway.service.type=ClusterIP
+  --set gateway.service.type=ClusterIP \
+  --set persistence.enabled=true \
+  --set persistence.storageClassName=standard \
+  --set persistence.size=10Gi
 
 kubectl create namespace tracing
 helm install zipkin zipkin/zipkin --namespace tracing

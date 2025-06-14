@@ -31,6 +31,7 @@ loki:
     persistence:
       enabled: true
       existingClaim: loki-ingester-storage
+      storageClassName: local-path-immediate
     extraVolumeMounts:
       - name: storage
         mountPath: /var/loki
@@ -44,6 +45,7 @@ loki:
     persistence:
       enabled: true
       existingClaim: loki-querier-storage
+      storageClassName: local-path-immediate
     extraVolumeMounts:
       - name: storage
         mountPath: /var/loki
