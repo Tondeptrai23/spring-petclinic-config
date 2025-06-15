@@ -52,10 +52,20 @@ alloy:
       loki.process "spring_logs" {
         forward_to = [loki.write.default.receiver]
 
+        stage.regex {
+          expression = ".*traceId=(?P<trace_id>[a-f0-9]{32}).*"
+        }
+        stage.labels {
+          values = {
+            trace_id = "trace_id"
+          }
+        }
+
         stage.drop {
           older_than          = "1h"
           drop_counter_reason = "too old"
         }
+
         stage.match {
           selector = "{namespace=~\"dev.*|staging\", container=~\"visits-service|customers-service|vets-service|api-gateway|config-server|discovery-server|admin-server|genai-service\"}"
           stage.regex {
