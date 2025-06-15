@@ -57,7 +57,7 @@ alloy:
         }
         stage.labels {
           values = {
-            trace_id = "trace_id"
+            trace_id = "trace_id",
           }
         }
 
