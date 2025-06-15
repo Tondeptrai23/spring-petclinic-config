@@ -50,6 +50,13 @@ loki:
           period: 24h
 
 gateway:
+  enabled: false
+
+monitoring:
+  serviceMonitor:
+    enabled: false
+
+loki-canary:
   enabled: true
-  service:
-    type: ClusterIP
+  config:
+    lokiAddress: http://loki.logging.svc.cluster.local:3100
