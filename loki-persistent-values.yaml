@@ -48,6 +48,6 @@ loki:
           period: 24h
 
 gateway:
-  enabled: true
-  service:
-    type: ClusterIP
+  enabled: false
+  # service:
+  #   type: ClusterIP
