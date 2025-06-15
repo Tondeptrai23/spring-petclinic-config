@@ -53,11 +53,14 @@ alloy:
         forward_to = [loki.write.default.receiver]
 
         stage.regex {
-          expression = ".*traceId=(?P<trace_id>[a-f0-9]{32}).*"
+          expression = '.*time="(?P<timestamp>[^"]+)" service="(?P<service>[^"]+)" traceId="(?P<trace_id>[^"]+)" spanId="(?P<span_id>[^"]+)".*'
         }
+
         stage.labels {
           values = {
             trace_id = "trace_id",
+            span_id = "span_id",
+            service = "service",
           }
         }
 
