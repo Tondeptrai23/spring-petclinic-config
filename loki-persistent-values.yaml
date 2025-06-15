@@ -15,6 +15,7 @@ fullnameOverride: ""
 namespace: logging
 
 loki:
+  useTestSchema: true
   commonConfig:
     path_prefix: /var/loki
     replication_factor: 1
