@@ -35,6 +35,16 @@ loki:
     filesystem:
       directory: /var/loki/chunks
 
+  schema_config:
+    configs:
+      - from: "2020-10-24"
+        store: boltdb-shipper
+        object_store: filesystem
+        schema: v11
+        index:
+          prefix: index_
+          period: 24h
+
 gateway:
   enabled: true
   service:
