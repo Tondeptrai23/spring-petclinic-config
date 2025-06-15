@@ -49,5 +49,5 @@ loki:
 
 gateway:
   enabled: false
-  # service:
-  #   type: ClusterIP
+  service:
+    type: ClusterIP
