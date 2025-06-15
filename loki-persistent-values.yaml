@@ -1,20 +1,24 @@
 singleBinary:
-  replicas: 0
+  replicas: 1
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: local-path-immediate
 
+# Disable distributed components
 write:
-  replicas: 1
-
+  replicas: 0
 read:
-  replicas: 1
-
+  replicas: 0
 backend:
-  replicas: 1
+  replicas: 0
 
 nameOverride: ""
 fullnameOverride: ""
 namespace: logging
 
 loki:
+  auth_enabled: false
   commonConfig:
     path_prefix: /var/loki
     replication_factor: 1
@@ -26,34 +30,6 @@ loki:
   storage:
     type: filesystem
 
-  ingester:
-    replicas: 1
-    persistence:
-      enabled: true
-      existingClaim: loki-ingester-storage
-      storageClassName: local-path-immediate
-    extraVolumeMounts:
-      - name: storage
-        mountPath: /var/loki
-    extraVolumes:
-      - name: storage
-        persistentVolumeClaim:
-          claimName: loki-ingester-storage
-
-  querier:
-    replicas: 1
-    persistence:
-      enabled: true
-      existingClaim: loki-querier-storage
-      storageClassName: local-path-immediate
-    extraVolumeMounts:
-      - name: storage
-        mountPath: /var/loki
-    extraVolumes:
-      - name: storage
-        persistentVolumeClaim:
-          claimName: loki-querier-storage
-
   storage_config:
     boltdb_shipper:
       shared_store: filesystem
@@ -62,6 +38,16 @@ loki:
       cache_ttl: 24h
     filesystem:
       directory: /var/loki/chunks
+
+  schema_config:
+    configs:
+      - from: "2024-01-01"
+        store: boltdb-shipper
+        object_store: filesystem
+        schema: v12
+        index:
+          prefix: loki_index_
+          period: 24h
 
 gateway:
   enabled: true
