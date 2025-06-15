@@ -10,8 +10,6 @@ read:
 backend:
   replicas: 0
 
-nameOverride: ""
-fullnameOverride: ""
 namespace: logging
 
 loki:
@@ -48,6 +46,6 @@ loki:
           period: 24h
 
 gateway:
-  enabled: true
+  enabled: false
   service:
     type: ClusterIP
