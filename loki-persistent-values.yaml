@@ -3,9 +3,16 @@ deploymentMode: SingleBinary
 singleBinary:
   replicas: 1
   persistence:
-    enabled: true
-    size: 10Gi
-    storageClass: local-path-immediate
+    enabled: false
+
+  extraVolumeMounts:
+    - name: loki-storage
+      mountPath: /var/loki
+
+  extraVolumes:
+    - name: loki-storage
+      persistentVolumeClaim:
+        claimName: loki-storage
 
 nameOverride: ""
 fullnameOverride: ""
@@ -31,10 +38,10 @@ loki:
 
   schema_config:
     configs:
-      - from: "2024-04-01"
-        store: tsdb
-        object_store: s3
-        schema: v13
+      - from: "2024-01-01"
+        store: boltdb-shipper
+        object_store: filesystem
+        schema: v12
         index:
           prefix: loki_index_
           period: 24h
