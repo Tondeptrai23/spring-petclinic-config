@@ -19,7 +19,7 @@ fullnameOverride: ""
 namespace: logging
 
 loki:
-  # useTestSchema: true
+  useTestSchema: true
   auth_enabled: false
   commonConfig:
     replication_factor: 1
@@ -29,7 +29,6 @@ loki:
 
   storage_config:
     boltdb_shipper:
-      shared_store: filesystem
       active_index_directory: /var/loki/index
       cache_location: /var/loki/cache
       cache_ttl: 24h
