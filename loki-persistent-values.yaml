@@ -1,25 +1,12 @@
-deploymentMode: SingleBinary
-
 singleBinary:
   replicas: 1
   persistence:
     enabled: true
     size: 10Gi
-    storageClass: local-path-immediate
+    storageClass: standard # Use the default storage class
 
-write:
-  replicas: 0
-read:
-  replicas: 0
-backend:
-  replicas: 0
-
-nameOverride: ""
-fullnameOverride: ""
-namespace: logging
-
+# Keep the rest of your existing configuration
 loki:
-  useTestSchema: true
   auth_enabled: false
   commonConfig:
     path_prefix: /var/loki
@@ -28,10 +15,8 @@ loki:
       filesystem:
         chunks_directory: /var/loki/chunks
         rules_directory: /var/loki/rules
-
   storage:
     type: filesystem
-
   storage_config:
     boltdb_shipper:
       shared_store: filesystem
@@ -40,7 +25,6 @@ loki:
       cache_ttl: 24h
     filesystem:
       directory: /var/loki/chunks
-
   schema_config:
     configs:
       - from: "2024-01-01"
@@ -50,13 +34,17 @@ loki:
         index:
           prefix: loki_index_
           period: 24h
+  useTestSchema: true
+
+write:
+  replicas: 0
+read:
+  replicas: 0
+backend:
+  replicas: 0
 
 gateway:
   enabled: false
-
-monitoring:
-  serviceMonitor:
-    enabled: false
 
 loki-canary:
   enabled: true
