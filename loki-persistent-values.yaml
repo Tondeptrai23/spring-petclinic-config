@@ -5,15 +5,7 @@ singleBinary:
   persistence:
     enabled: true
     size: 10Gi
-  # Add hostPath configuration
-  extraVolumes:
-    - name: loki-storage
-      hostPath:
-        path: /tmp/loki-data
-        type: DirectoryOrCreate
-  extraVolumeMounts:
-    - name: loki-storage
-      mountPath: /var/loki
+    storageClass: local-path-immediate
 
 nameOverride: ""
 fullnameOverride: ""
