@@ -5,7 +5,7 @@ singleBinary:
   persistence:
     enabled: true
     size: 10Gi
-    storageClass: local-path-immediate
+    storageClass: standard
 
 write:
   replicas: 0
