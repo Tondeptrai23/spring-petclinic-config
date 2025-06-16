@@ -12,7 +12,7 @@ fullnameOverride: ""
 namespace: logging
 
 loki:
-  useTestSchema: true
+  # useTestSchema: true
   auth_enabled: false
   commonConfig:
     replication_factor: 1
@@ -46,8 +46,8 @@ loki:
   ruler:
     enable_api: true
 
-gateway:
-  enabled: false
+# gateway:
+#   enabled: false
 
 backend:
   replicas: 0
