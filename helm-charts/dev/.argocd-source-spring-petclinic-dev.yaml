@@ -10,31 +10,31 @@ helm:
     value: mikenam/spring-petclinic-customers-service
     forcestring: true
   - name: images.customers-service.tag
-    value: 0ae3a82
+    value: latest
     forcestring: true
   - name: images.vets-service.image
     value: mikenam/spring-petclinic-vets-service
     forcestring: true
   - name: images.vets-service.tag
-    value: 0ae3a82
+    value: latest
     forcestring: true
   - name: images.visits-service.image
     value: mikenam/spring-petclinic-visits-service
     forcestring: true
   - name: images.visits-service.tag
-    value: 0ae3a82
+    value: latest
     forcestring: true
   - name: images.admin-server.image
     value: mikenam/spring-petclinic-admin-server
     forcestring: true
   - name: images.admin-server.tag
-    value: 9c43578
+    value: test-trace-metric
     forcestring: true
   - name: images.api-gateway.image
     value: mikenam/spring-petclinic-api-gateway
     forcestring: true
   - name: images.api-gateway.tag
-    value: 0ae3a82
+    value: latest
     forcestring: true
   - name: images.config-server.image
     value: mikenam/spring-petclinic-config-server
