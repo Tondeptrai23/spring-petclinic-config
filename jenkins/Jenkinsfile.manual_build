@@ -120,7 +120,11 @@ pipeline {
 
                     def setArgs = SERVICES.collect { svc ->
                         def envVar = (svc.replace('-', '_').toUpperCase()) + '_TAG'
-                        "--set images.${svc}.tag=${env."${envVar}"}"
+						if (env."${envVar}" == 'latest') {
+							"--set imagePullPolicy=Always --set images.${svc}.tag=${env."${envVar}"}"
+						} else  {
+							"--set imagePullPolicy=IfNotPresent --set images.${svc}.tag=${env."${envVar}"}"
+						}
                     }.join(' ')
 
                     withCredentials([
