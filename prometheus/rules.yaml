@@ -16,4 +16,4 @@ spec:
           annotations:
             summary: "{{ $labels.service }} in namespace {{ $labels.namespace }} 5xx rate is high"
             description: |
-              {{ $labels. }} ({{ $labels.service }} namespace {{ $labels.namespace }}) is returning more than 10 5xx errors in the last 30 seconds.
+              {{ $labels.instance }} ({{ $labels.service }} in namespace {{ $labels.namespace }}) is returning more than 10 5xx errors in the last 30 seconds.
