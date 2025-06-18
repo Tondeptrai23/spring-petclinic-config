@@ -16,8 +16,6 @@ spec:
       labels:
         app: {{ $config.containerName }}
     spec:
-      imagePullSecrets:
-        - name: regcred
       {{- if $config.dependOnConfigServer }}
       initContainers:
         - name: wait-for-config-server
