@@ -27,7 +27,7 @@ pipeline {
             description: 'Delay in minutes before the cleanup ("delete_build") job is triggered'
         )
 
-		booleanParam(name: 'PULL_IMAGES', defaultValue: 'false', description: 'Pull images before deployment?')
+		booleanParam(name: 'PULL_IMAGES', defaultValue: 'true', description: 'Pull images before deployment?')
     }
 
     environment {
@@ -125,7 +125,7 @@ pipeline {
 						"--set images.${svc}.tag=${env."${envVar}"}"
                     }.join(' ')
 
-					def pullPolicy = params.PULL_IMAGES?.trim()?.toLowerCase() == "true" ? 'Always' : 'IfNotPresent'
+					def pullPolicy = params.PULL_IMAGES ? 'Always' : 'IfNotPresent'
 
                     withCredentials([
                         file  (credentialsId: env.KUBECONFIG_ID,       variable: 'KUBECONFIG'),
