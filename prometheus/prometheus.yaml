@@ -8,6 +8,7 @@ prometheus:
     size: 500Mi
     
 grafana:
+  init-chown-data: false
   persistence:
     enabled: true
     size: 500Mi
