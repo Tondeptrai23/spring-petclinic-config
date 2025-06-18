@@ -11,6 +11,3 @@ grafana:
   persistence:
     enabled: true
     size: 500Mi
-
-rule_files:
-  - ./rules.yaml
