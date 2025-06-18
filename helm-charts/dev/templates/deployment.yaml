@@ -47,12 +47,6 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-            - name: OTEL_SERVICE_NAME
-              value: {{ $config.containerName }}
-            - name: OTEL_RESOURCE_ATTRIBUTES
-              value: |
-                service.name={{ $config.containerName }},
-                k8s.namespace=$(NAMESPACE)
           resources:
             limits:
               memory: "300Mi" 

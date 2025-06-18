@@ -120,7 +120,7 @@ pipeline {
 
                     def setArgs = SERVICES.collect { svc ->
                         def envVar = (svc.replace('-', '_').toUpperCase()) + '_TAG'
-                        "--set services.${svc}.tag=${env."${envVar}"}"
+                        "--set images.${svc}.tag=${env."${envVar}"}"
                     }.join(' ')
 
                     withCredentials([
