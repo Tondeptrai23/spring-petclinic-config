@@ -27,7 +27,7 @@ pipeline {
             description: 'Delay in minutes before the cleanup ("delete_build") job is triggered'
         )
 
-		string(name: 'PULL_IMAGES', defaultValue: 'false', description: 'Pull images before deployment?')
+		string(name: 'PULL_IMAGES', defaultValue: 'false', description: 'Pull images before deployment?', type: boolean)
     }
 
     environment {
