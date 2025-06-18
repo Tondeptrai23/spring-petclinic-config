@@ -1,6 +1,7 @@
 prometheus:
   prometheusSpec:
     serviceMonitorNamespaceSelector: {}
+    maximumStartupDurationSeconds: 60
     enableFeatures:
       - exemplar-storage
   persistence:
