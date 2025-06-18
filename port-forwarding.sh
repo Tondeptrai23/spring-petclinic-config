@@ -7,6 +7,7 @@ declare -A SERVICES=(
   ["Loki"]="logging loki-loki-distributed-gateway 3100:80"
   ["Zipkin"]="tracing zipkin 9411:9411"
   ["Alloy"]="logging alloy 12345:12345"
+  ["ArgoCD"]="argocd argocd-server 38080:80"
 )
 
 # Start port-forwarding in background for each service
