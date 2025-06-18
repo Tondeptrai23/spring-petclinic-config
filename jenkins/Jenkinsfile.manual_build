@@ -26,6 +26,8 @@ pipeline {
             defaultValue: '60',
             description: 'Delay in minutes before the cleanup ("delete_build") job is triggered'
         )
+
+		string(name: 'PULL_IMAGES', defaultValue: 'true', description: 'Pull images before deployment?')
     }
 
     environment {
@@ -120,12 +122,10 @@ pipeline {
 
                     def setArgs = SERVICES.collect { svc ->
                         def envVar = (svc.replace('-', '_').toUpperCase()) + '_TAG'
-						if (env."${envVar}" == 'latest') {
-							"--set imagePullPolicy=Always --set images.${svc}.tag=${env."${envVar}"}"
-						} else  {
-							"--set imagePullPolicy=IfNotPresent --set images.${svc}.tag=${env."${envVar}"}"
-						}
+						"--set images.${svc}.tag=${env."${envVar}"}"
                     }.join(' ')
+
+					def pullPolicy = params.PULL_IMAGES?.trim()?.toLowerCase() == "true" ? 'Always' : 'IfNotPresent'
 
                     withCredentials([
                         file  (credentialsId: env.KUBECONFIG_ID,       variable: 'KUBECONFIG'),
@@ -136,6 +136,7 @@ pipeline {
                                 --namespace ${namespace} --create-namespace \
                                 -f ${templateDir}/values.yaml \
                                 --set image.pullSecrets[0].name=$DOCKERHUB_SECRET \
+								--set imagePullPolicy=${pullPolicy} \
                                 --set namespace=${namespace} \
                                 ${setArgs}
                         """

@@ -31,7 +31,7 @@ spec:
       containers:
         - name: {{ $config.containerName }}
           image: {{ index $.Values.images $name "image" }}:{{ index $.Values.images $name "tag" }}
-          imagePullPolicy: {{ $config.imagePullPolicy | default "Always" }}
+          imagePullPolicy: {{ $.Values.imagePullPolicy | default "IfNotPresent" }}
           ports:
             - containerPort: {{ $config.port }}
           env:
