@@ -7,7 +7,7 @@ alloy:
       }        
       loki.write "default" {
           endpoint {
-            url = "http://loki-loki-distributed-gateway.logging.svc.cluster.local/loki/api/v1/push"
+            url = "http://loki-gateway.logging.svc.cluster.local/loki/api/v1/push"
           }
           external_labels = {
             cluster = "cluster-name-test",
