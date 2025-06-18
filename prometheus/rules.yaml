@@ -1,7 +1,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: custom-rules
+  name: devops-rules
   labels:
     release: prometheus
 spec:
@@ -13,6 +13,6 @@ spec:
           labels:
             severity: critical
           annotations:
-            summary: "{{ $labels.application }} 5xx rate is high"
+            summary: "{{ $labels.service }} in namespace {{ $labels.namespace }} 5xx rate is high"
             description: |
-              {{ $labels.instance }} ({{ $labels.application }}) is returning more than 10 5xx errors in the last 30 seconds.
+              {{ $labels. }} ({{ $labels.service }} namespace {{ $labels.namespace }}) is returning more than 10 5xx errors in the last 30 seconds.

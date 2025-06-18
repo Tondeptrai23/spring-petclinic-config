@@ -1,8 +1,6 @@
 prometheus:
   prometheusSpec:
     serviceMonitorNamespaceSelector: {}
-    podMonitorNamespaceSelector: {}
-    maximumStartupDurationSeconds: 60
     enableFeatures:
       - exemplar-storage
   persistence:
@@ -10,22 +8,9 @@ prometheus:
     size: 500Mi
     
 grafana:
-  sidecar:
-    datasources:
-      enabled: true
-      label: grafana_datasource
   persistence:
     enabled: true
     size: 500Mi
-
-kubeEtcd:
-  enabled: false
-kubeScheduler:
-  serviceMonitor:
-    enabled: false
-kubeProxy:
-  serviceMonitor:
-    enabled: false
 
 rule_files:
   - ./rules.yaml
