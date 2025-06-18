@@ -1,0 +1,12 @@
+controller:
+  imagePullSecrets:
+    - name: regcred
+server:
+  imagePullSecrets:
+    - name: regcred
+repoServer:
+  imagePullSecrets:
+    - name: regcred
+applicationSet:
+  imagePullSecrets:
+    - name: regcred
