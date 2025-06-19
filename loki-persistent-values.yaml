@@ -3,9 +3,7 @@ deploymentMode: SingleBinary
 singleBinary:
   replicas: 1
   persistence:
-    enabled: true
-    size: 2Gi
-    existingClaim: loki-storage
+    enabled: false
 
   securityContext:
     runAsUser: 10001
