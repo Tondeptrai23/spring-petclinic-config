@@ -40,13 +40,13 @@ helm:
     value: mikenam/spring-petclinic-config-server
     forcestring: true
   - name: images.config-server.tag
-    value: feat-test-d52eedd
+    value: f4292a9
     forcestring: true
   - name: images.discovery-server.image
     value: mikenam/spring-petclinic-discovery-server
     forcestring: true
   - name: images.discovery-server.tag
-    value: feat-test-d52eedd
+    value: 6e32bcc
     forcestring: true
   - name: images.genai-service.image
     value: mikenam/spring-petclinic-genai-service
