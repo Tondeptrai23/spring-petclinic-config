@@ -65,7 +65,10 @@ helm install loki grafana/loki-distributed --namespace logging \
   --set persistence.size=10Gi
 
 kubectl create namespace tracing
-helm install zipkin zipkin/zipkin --namespace tracing
+helm upgrade --install zipkin zipkin/zipkin \
+  --namespace tracing  \
+  -f zipkin-lab-values.yaml
+
 
 ## PORT FORWARDING FOR LOCAL TESTING
 kubectl port-forward svc/prometheus-operated 9090:9090 -n monitoring --address 0.0.0.0
