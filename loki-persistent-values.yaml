@@ -3,11 +3,14 @@ deploymentMode: SingleBinary
 singleBinary:
   replicas: 1
   persistence:
-    enabled: false
+    enabled: true
+    size: 2Gi
+    existingClaim: loki-storage
 
   securityContext:
-    runAsUser: 0
-    runAsGroup: 0
+    runAsUser: 10001
+    runAsGroup: 10001
+    fsGroup: 10001
 
   extraVolumeMounts:
     - name: loki-storage
@@ -27,9 +30,6 @@ loki:
   auth_enabled: false
   commonConfig:
     replication_factor: 1
-  securityContext:
-    runAsUser: 0
-    runAsGroup: 0
   storage:
     type: filesystem
 
