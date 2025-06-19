@@ -4,13 +4,6 @@ prometheus:
     maximumStartupDurationSeconds: 60
     enableFeatures:
       - exemplar-storage
-    storageSpec:
-      volumeClaimTemplate:
-        spec:
-          resources:
-            requests:
-              storage: 8Gi
-
     
 grafana:
   init-chown-data: false
