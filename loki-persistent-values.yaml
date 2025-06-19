@@ -5,6 +5,10 @@ singleBinary:
   persistence:
     enabled: false
 
+  securityContext:
+    runAsUser: 0
+    runAsGroup: 0
+
   extraVolumeMounts:
     - name: loki-storage
       mountPath: /var/loki
