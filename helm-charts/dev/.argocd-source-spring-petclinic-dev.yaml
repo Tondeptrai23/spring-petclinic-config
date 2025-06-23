@@ -28,7 +28,7 @@ helm:
     value: mikenam/spring-petclinic-admin-server
     forcestring: true
   - name: images.admin-server.tag
-    value: f4292a9
+    value: 802172e
     forcestring: true
   - name: images.api-gateway.image
     value: mikenam/spring-petclinic-api-gateway
@@ -40,13 +40,13 @@ helm:
     value: mikenam/spring-petclinic-config-server
     forcestring: true
   - name: images.config-server.tag
-    value: f4292a9
+    value: 802172e
     forcestring: true
   - name: images.discovery-server.image
     value: mikenam/spring-petclinic-discovery-server
     forcestring: true
   - name: images.discovery-server.tag
-    value: 6e32bcc
+    value: 802172e
     forcestring: true
   - name: images.genai-service.image
     value: mikenam/spring-petclinic-genai-service
