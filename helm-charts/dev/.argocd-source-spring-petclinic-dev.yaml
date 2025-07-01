@@ -46,7 +46,7 @@ helm:
     value: mikenam/spring-petclinic-discovery-server
     forcestring: true
   - name: images.discovery-server.tag
-    value: 802172e
+    value: 0353c99
     forcestring: true
   - name: images.genai-service.image
     value: mikenam/spring-petclinic-genai-service
