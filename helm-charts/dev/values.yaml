@@ -9,7 +9,7 @@ images:
     
   customers-service:
     image: mikenam/spring-petclinic-customers-service
-    tag: 1f62b7e
+    tag: 5416bad
 
   discovery-server:
     image: mikenam/spring-petclinic-discovery-server
