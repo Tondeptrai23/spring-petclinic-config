@@ -4,35 +4,35 @@ replicaCount: 1
 images:
   config-server:
     image: mikenam/spring-petclinic-config-server
-    tag: v2.0.0
+    tag: v2.0.1
     
   customers-service:
     image: mikenam/spring-petclinic-customers-service
-    tag: v2.0.0
+    tag: v2.0.1
 
   discovery-server:
     image: mikenam/spring-petclinic-discovery-server
-    tag: v2.0.0
+    tag: v2.0.1
 
   visits-service:
     image: mikenam/spring-petclinic-visits-service
-    tag: v2.0.0
+    tag: v2.0.1
 
   vets-service:
     image: mikenam/spring-petclinic-vets-service
-    tag: v2.0.0
+    tag: v2.0.1
 
   genai-service:
     image: mikenam/spring-petclinic-genai-service
-    tag: v2.0.0
+    tag: v2.0.1
 
   api-gateway:
     image: mikenam/spring-petclinic-api-gateway
-    tag: v2.0.0
+    tag: v2.0.1
 
   admin-server:
     image: mikenam/spring-petclinic-admin-server
-    tag: v2.0.0
+    tag: v2.0.1
 
 services:
   config-server:
