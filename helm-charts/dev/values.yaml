@@ -21,7 +21,7 @@ images:
 
   vets-service:
     image: mikenam/spring-petclinic-vets-service
-    tag: e3ba068
+    tag: b1de945
 
   genai-service:
     image: mikenam/spring-petclinic-genai-service
