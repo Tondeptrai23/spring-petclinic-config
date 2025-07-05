@@ -5,35 +5,35 @@ imagePullPolicy: IfNotPresent
 images:
   config-server:
     image: mikenam/spring-petclinic-config-server
-    tag: latest
+    tag: e05ddd7
     
   customers-service:
     image: mikenam/spring-petclinic-customers-service
-    tag: latest
+    tag: e05ddd7
 
   discovery-server:
     image: mikenam/spring-petclinic-discovery-server
-    tag: latest
+    tag: e05ddd7
 
   visits-service:
     image: mikenam/spring-petclinic-visits-service
-    tag: latest
+    tag: e05ddd7
 
   vets-service:
     image: mikenam/spring-petclinic-vets-service
-    tag: latest
+    tag: e05ddd7
 
   genai-service:
     image: mikenam/spring-petclinic-genai-service
-    tag: latest
+    tag: e05ddd7
 
   api-gateway:
     image: mikenam/spring-petclinic-api-gateway
-    tag: latest
+    tag: e05ddd7
 
   admin-server:
     image: mikenam/spring-petclinic-admin-server
-    tag: latest
+    tag: e05ddd7
 
 services:
   config-server:
