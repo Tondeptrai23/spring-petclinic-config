@@ -10,7 +10,7 @@ helm:
     value: mikenam/spring-petclinic-customers-service
     forcestring: true
   - name: images.customers-service.tag
-    value: v2.0.1
+    value: 1f62b7e
     forcestring: true
   - name: images.vets-service.image
     value: mikenam/spring-petclinic-vets-service
